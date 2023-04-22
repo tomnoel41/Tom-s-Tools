@@ -3,7 +3,7 @@
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m'
-VERSION='v1.2.0'
+VERSION='v1.3.0'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
@@ -161,7 +161,7 @@ create_fivem_server() {
   # Lancer le serveur
   read -p "Voulez vous lancer le serveur ? (y/n)" launch
   if [[ "$launch" == "y" ]]; then
-    sudo bash run.sh
+    cd ${server_path} && sudo bash run.sh
   fi
   if [[ "$launch" == "n" ]]; then
     echo -e "${BLUE}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './run.sh' dans le répertoire du serveur.${NC}"
