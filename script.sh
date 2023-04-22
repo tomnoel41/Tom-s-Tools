@@ -3,7 +3,7 @@
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m'
-VERSION='v1.1.0'
+VERSION='v1.2.0'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
@@ -22,7 +22,8 @@ display_menu() {
   echo -e "${BLUE}3. ${YELLOW}Créer un nouvel utilisateur"
   echo -e "${BLUE}4. ${YELLOW}Tout faire ${BLUE}(1, 2 et 3)"
   echo -e "${BLUE}5. ${YELLOW}Créer et lancer un serveur ${BLUE}Minecraft"
-  echo -e "${BLUE}6. ${YELLOW}Quitter (Bye bye)"
+  echo -e "${BLUE}6. ${YELLOW}Créer et lancer un serveur ${BLUE}FiveM"
+  echo -e "${BLUE}7. ${YELLOW}Quitter (Bye bye)"
 }
 
 
@@ -111,7 +112,51 @@ create_minecraft_server() {
     sudo bash start.sh
   fi
   if [[ "$launch" == "n" ]]; then
-    echo -e "${BLUE}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './start.sh'."
+    echo -e "${BLUE}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './start.sh' dans le répertoire du serveur."
+  fi
+}
+
+create_fivem_server() {
+  # Vérifier si xz-utils est installé
+  if ! command -v tar &> /dev/null; then
+    echo "xz-utils n'est pas installé. Installation en cours..."
+    sudo apt-get update
+    sudo apt-get install xz-utils -y
+  fi
+
+  # Vérifier si git est installé
+  if ! command -v tar &> /dev/null; then
+    echo "git n'est pas installé. Installation en cours..."
+    sudo apt-get update
+    sudo apt-get install git -y
+  fi
+
+  # Vérifier si wget est installé
+  if ! command -v tar &> /dev/null; then
+    echo "wget n'est pas installé. Installation en cours..."
+    sudo apt-get update
+    sudo apt-get install wget -y
+  fi
+
+  # Créer un dossier pour le serveur
+  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur: " server_path
+  sudo mkdir -p $server_path
+  cd $server_path
+
+  # Télécharger l'artefacts (alpine)
+  read -p "Veuillez entrer le lien de l'artefacts (alpine) pour le serveur : " artefacts_link
+  wget $artefacts_link
+
+  # Unarchive l'artefacts
+  tar -xvf fx.tar.xz && rm fx.tar.xz
+
+  # Lancer le serveur
+  read -p "Voulez vous lancer le serveur ? (y/n)" launch
+  if [[ "$launch" == "y" ]]; then
+    sudo bash run.sh
+  fi
+  if [[ "$launch" == "n" ]]; then
+    echo -e "${BLUE}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './run.sh' dans le répertoire du serveur."
   fi
 }
 
@@ -142,6 +187,9 @@ do
       create_minecraft_server
       ;;
     6)
+      create_fivem_server
+      ;;
+    7)
       echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools."
       exit 0
       ;;
