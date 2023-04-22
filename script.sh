@@ -70,6 +70,7 @@ install_packages() {
 
 # Fonction pour créer un nouvel utilisateur
 create_user() {
+  read -p "Voulez-vous donner les permissions sudo et root à cet utilisateur ? (y/n) : " give_permissions
   read -p "Veuillez saisir le nom d'utilisateur pour le nouvel utilisateur : " new_user
   read -s -p "Veuillez saisir le mot de passe pour le nouvel utilisateur : " new_password
   echo
@@ -180,7 +181,6 @@ setup_mariadb_server() {
   echo -e "${BLUE}L'installation de votre serveur MariaDB à été éffectué correctement."
 }
 
-
 # Afficher le menu et demander à l'utilisateur de saisir une option
 while true
 do
@@ -194,13 +194,11 @@ do
       install_packages
       ;;
     3)
-      read -p "Voulez-vous donner les permissions sudo et root à cet utilisateur ? (y/n) : " give_permissions
       create_user
       ;;
     4)
       update_system
       install_packages
-      read -p "Voulez-vous donner les permissions sudo et root à cet utilisateur ? (y/n) : " give_permissions
       create_user
       ;;
     5)
