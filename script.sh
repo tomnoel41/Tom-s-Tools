@@ -28,9 +28,7 @@ display_menu() {
 # Vérification des mises à jour
 echo -e "${YELLOW}Vérification des mises à jour...${NC}"
 latest_version=$(curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/last_version.txt)
-current_version=$(grep "Version:" $0 | awk '{print $2}')
-
-if [[ "$latest_version" != "$current_version" ]]; then
+if [[ "$latest_version" != "$VERSION" ]]; then
    echo -e "${YELLOW}Une nouvelle version de ce script est disponible ! (version $latest_version)${NC}"
    echo -e "${YELLOW}Voulez-vous mettre à jour ? (y/n)${NC}"
    read update_script
