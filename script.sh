@@ -37,11 +37,11 @@ if [[ "$latest_version" != "$current_version" ]]; then
 
    if [[ "$update_script" == "y" ]]; then
       echo -e "${YELLOW}Téléchargement de la dernière version...${NC}"
-      curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/script.sh -o /tmp/utilitaire-bash.sh
+      curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/script.sh -o /tmp/script.sh
 
       if [[ $? -eq 0 ]]; then
          echo -e "${YELLOW}Installation de la dernière version...${NC}"
-         mv /tmp/utilitaire-bash.sh $0
+         mv /tmp/script.sh $0
          chmod +x $0
          echo -e "${YELLOW}Le script a été mis à jour avec succès !${NC}"
          exec $0
