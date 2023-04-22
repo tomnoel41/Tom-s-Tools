@@ -3,7 +3,7 @@
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m'
-VERSION='v1.0.0'
+VERSION='v1.1.0'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
@@ -21,11 +21,17 @@ display_menu() {
   echo -e "${BLUE}2. ${YELLOW}Installer des packages de base ${BLUE}(bash, curl, sudo, wget, nload, htop, git)"
   echo -e "${BLUE}3. ${YELLOW}Créer un nouvel utilisateur"
   echo -e "${BLUE}4. ${YELLOW}Tout faire ${BLUE}(1, 2 et 3)"
-  echo -e "${BLUE}5. ${YELLOW}Quitter (Bye bye)"
+  echo -e "${BLUE}5. ${YELLOW}Créer et lancer un serveur ${BLUE}Minecraft"
+  echo -e "${BLUE}6. ${YELLOW}Quitter (Bye bye)"
 }
 
 
 # Vérification des mises à jour
+if ! command -v curl &> /dev/null; then
+    echo "Curl n'est pas installé. Installation en cours..."
+    sudo apt-get update
+    apt install curl -y
+fi
 echo -e "${YELLOW}Vérification des mises à jour...${NC}"
 latest_version=$(curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/last_version.txt)
 if [[ "$latest_version" != "$VERSION" ]]; then
@@ -73,6 +79,43 @@ create_user() {
   echo "$new_user:$new_password" | sudo chpasswd
 }
 
+create_minecraft_server() {
+  # Vérifier si Java est installé
+  if ! command -v java &> /dev/null; then
+    echo "Java n'est pas installé. Installation en cours..."
+    sudo apt-get update
+    sudo apt-get install openjdk-17-jdk openjdk-17-jre -y
+  fi
+  
+  # Demander à l'utilisateur de saisir la version du serveur
+  read -p "Veuillez entrer la version de Spigot à installer (par exemple, '1.12.2'): " version
+
+  # Demander à l'utilisateur la RAM max qu'il veut
+  read -p "Veuillez entrer la valeur maximum de la RAM que vous souhaitez (par exemple, '4096' pour 4GB): " max_ram
+  
+  # Créer un dossier pour le serveur
+  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur: " server_path
+  sudo mkdir -p $server_path
+  cd $server_path
+  
+  # Télécharger le fichier Spigot.jar
+  sudo wget https://cdn.getbukkit.org/spigot/spigot-$version.jar
+
+  echo "eula=true" > eula.txt
+  echo "sudo java -Xmx${max_ram}M -Xms1024M -jar spigot-${version}.jar nogui" > start.sh
+
+  # Rendre éxécutable le start.sh
+  chmod +x start.sh
+  read -p "Voulez vous lancer le serveur ? (y/n)" launch
+  if [[ "$launch" == "y" ]]; then
+    sudo bash start.sh
+  fi
+  if [[ "$launch" == "n" ]]; then
+    echo -e "${BLUE}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './start.sh'."
+  fi
+}
+
+
 # Afficher le menu et demander à l'utilisateur de saisir une option
 while true
 do
@@ -96,6 +139,9 @@ do
       create_user
       ;;
     5)
+      create_minecraft_server
+      ;;
+    6)
       echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools."
       exit 0
       ;;
