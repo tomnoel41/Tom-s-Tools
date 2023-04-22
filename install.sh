@@ -27,7 +27,7 @@ display_menu() {
 
 # Vérification des mises à jour
 echo -e "${YELLOW}Vérification des mises à jour...${NC}"
-latest_version=$(curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/version.txt)
+latest_version=$(curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/last_version.txt)
 current_version=$(grep "Version:" $0 | awk '{print $2}')
 
 if [[ "$latest_version" != "$current_version" ]]; then
