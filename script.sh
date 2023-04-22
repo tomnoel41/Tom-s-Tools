@@ -76,9 +76,9 @@ install_packages() {
 
 # Fonction pour créer un nouvel utilisateur
 create_user() {
-  read -p "Voulez-vous donner les permissions sudo et root à cet utilisateur ? (y/n) : ${NC}" give_permissions
-  read -p "Veuillez saisir le nom d'utilisateur pour le nouvel utilisateur : ${NC}" new_user
-  read -s -p "Veuillez saisir le mot de passe pour le nouvel utilisateur : ${NC}" new_password
+  read -p "Voulez-vous donner les permissions sudo et root à cet utilisateur ? (y/n) :" give_permissions
+  read -p "Veuillez saisir le nom d'utilisateur pour le nouvel utilisateur :" new_user
+  read -s -p "Veuillez saisir le mot de passe pour le nouvel utilisateur :" new_password
   echo
   sudo adduser $new_user --gecos "User"
   if [[ "$give_permissions" == "y" ]]; then
@@ -97,13 +97,13 @@ create_minecraft_server() {
   fi
   
   # Demander à l'utilisateur de saisir la version du serveur
-  read -p "Veuillez entrer la version de Spigot à installer (par exemple, '1.12.2'): ${NC}" version
+  read -p "Veuillez entrer la version de Spigot à installer (par exemple, '1.12.2'):" version
 
   # Demander à l'utilisateur la RAM max qu'il veut
-  read -p "Veuillez entrer la valeur maximum de la RAM que vous souhaitez (par exemple, '4096' pour 4GB): ${NC}" max_ram
+  read -p "Veuillez entrer la valeur maximum de la RAM que vous souhaitez (par exemple, '4096' pour 4GB):" max_ram
   
   # Créer un dossier pour le serveur
-  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur: ${NC}" server_path
+  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur:" server_path
   sudo mkdir -p $server_path
   cd $server_path
   
@@ -115,7 +115,7 @@ create_minecraft_server() {
 
   # Rendre éxécutable le start.sh
   chmod +x start.sh
-  read -p "Voulez vous lancer le serveur ? (y/n)${NC}" launch
+  read -p "Voulez vous lancer le serveur ? (y/n)" launch
   if [[ "$launch" == "y" ]]; then
     sudo bash start.sh
   fi
@@ -147,19 +147,19 @@ create_fivem_server() {
   fi
 
   # Créer un dossier pour le serveur
-  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur: ${NC}" server_path
+  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur:" server_path
   sudo mkdir -p $server_path
   cd $server_path
 
   # Télécharger l'artefacts (alpine)
-  read -p "Veuillez entrer le lien de l'artefacts (alpine) pour le serveur : ${NC}" artefacts_link
+  read -p "Veuillez entrer le lien de l'artefacts (alpine) pour le serveur:" artefacts_link
   wget $artefacts_link
 
   # Unarchive l'artefacts
   tar -xvf fx.tar.xz && rm fx.tar.xz
 
   # Lancer le serveur
-  read -p "Voulez vous lancer le serveur ? (y/n)${NC}" launch
+  read -p "Voulez vous lancer le serveur ? (y/n)" launch
   if [[ "$launch" == "y" ]]; then
     sudo bash run.sh
   fi
@@ -177,10 +177,10 @@ setup_mariadb_server() {
   sudo mysql_secure_installation
 
   # Ajouter un utilisateur avec les permissions requises
-  read -p "Voulez vous créer un utilisateur administrateur ? (y/n)${NC}" create_admin_account
+  read -p "Voulez vous créer un utilisateur administrateur ? (y/n)" create_admin_account
   if [[ "$create_admin_account" == "y" ]]; then
-  read -p "Entrez le nom d'utilisateur de votre compte :${NC}" new_admin_user
-  read -s -p "Entrez le mot de passe de votre compte :${NC}" new_pass_user
+  read -p "Entrez le nom d'utilisateur de votre compte:" new_admin_user
+  read -s -p "Entrez le mot de passe de votre compte:" new_pass_user
     sudo mysql -e "CREATE USER '${new_admin_user}'@'%' IDENTIFIED BY '${new_pass_user}';"
     sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${new_admin_user}'@'%' WITH GRANT OPTION;"
   fi
@@ -200,7 +200,7 @@ install_nginx_php() {
     # Configurer Nginx pour utiliser PHP-FPM
     sudo mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup
     sudo touch /etc/nginx/sites-available/default
-    sudo sh -c 'echo "<h1>Bienvenue sur votre serveur Nginx installé par Toms Tools.sh!</h1>" > /var/www/html/index.html'
+    sudo sh -c 'echo "<h1>Bienvenue sur votre serveur Nginx par Toms Tools.sh !</h1>" > /var/www/html/index.html'
     sudo echo "
       server {
         listen 80 default_server;
@@ -220,6 +220,7 @@ install_nginx_php() {
 }
 
 install_phpmyadmin() {
+  apt install zip unzip -y
   export PHPMYADMIN_VERSION=$(curl --silent https://www.phpmyadmin.net/downloads/ | grep "btn btn-success download_popup" | sed -n 's/.*href="\([^"]*\).*/\1/p' | tr '/' '\n' | grep -E '^.*[0-9]+\.[0-9]+\.[0-9]+$')
   cd /var/www/html && wget https://files.phpmyadmin.net/phpMyAdmin/$PHPMYADMIN_VERSION/phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && unzip phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && rm phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && mv phpMyAdmin-$PHPMYADMIN_VERSION-all-languages pma
   systemctl restart nginx
@@ -231,7 +232,7 @@ install_phpmyadmin() {
 while true
 do
   display_menu
-  read -p "Votre choix : ${NC}" choice
+  read -p "Votre choix : " choice
   case $choice in
     1)
       update_system
