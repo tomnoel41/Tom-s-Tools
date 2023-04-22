@@ -3,6 +3,7 @@
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m'
+VERSION='v1.0.0'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
@@ -23,6 +24,32 @@ display_menu() {
   echo -e "${BLUE}5. ${YELLOW}Quitter (Bye bye)"
 }
 
+
+# Vérification des mises à jour
+echo -e "${YELLOW}Vérification des mises à jour...${NC}"
+latest_version=$(curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/version.txt)
+current_version=$(grep "Version:" $0 | awk '{print $2}')
+
+if [[ "$latest_version" != "$current_version" ]]; then
+   echo -e "${YELLOW}Une nouvelle version de ce script est disponible ! (version $latest_version)${NC}"
+   echo -e "${YELLOW}Voulez-vous mettre à jour ? (y/n)${NC}"
+   read update_script
+
+   if [[ "$update_script" == "y" ]]; then
+      echo -e "${YELLOW}Téléchargement de la dernière version...${NC}"
+      curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/script.sh -o /tmp/utilitaire-bash.sh
+
+      if [[ $? -eq 0 ]]; then
+         echo -e "${YELLOW}Installation de la dernière version...${NC}"
+         mv /tmp/utilitaire-bash.sh $0
+         chmod +x $0
+         echo -e "${YELLOW}Le script a été mis à jour avec succès !${NC}"
+         exec $0
+      else
+         echo -e "${YELLOW}La mise à jour a échoué.${NC}"
+      fi
+   fi
+fi
 
 # Fonction pour mettre à jour le système
 update_system() {
