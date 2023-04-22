@@ -133,14 +133,14 @@ create_fivem_server() {
   fi
 
   # Vérifier si git est installé
-  if ! command -v tar &> /dev/null; then
+  if ! command -v git &> /dev/null; then
     echo "git n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     sudo apt-get install git -y
   fi
 
   # Vérifier si wget est installé
-  if ! command -v tar &> /dev/null; then
+  if ! command -v wget &> /dev/null; then
     echo "wget n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     sudo apt-get install wget -y
