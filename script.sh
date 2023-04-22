@@ -23,7 +23,8 @@ display_menu() {
   echo -e "${BLUE}4. ${YELLOW}Tout faire ${BLUE}(1, 2 et 3)"
   echo -e "${BLUE}5. ${YELLOW}Créer et lancer un serveur ${BLUE}Minecraft"
   echo -e "${BLUE}6. ${YELLOW}Créer et lancer un serveur ${BLUE}FiveM"
-  echo -e "${BLUE}7. ${YELLOW}Quitter (Bye bye)"
+  echo -e "${BLUE}7. ${YELLOW}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
+  echo -e "${BLUE}8. ${YELLOW}Quitter (Bye bye)"
 }
 
 
@@ -160,6 +161,25 @@ create_fivem_server() {
   fi
 }
 
+setup_mariadb_server() {
+  # Installation de MariaDB
+  sudo apt-get update -y
+  sudo apt-get install mariadb-server -y
+
+  # Configuration de MariaDB
+  sudo mysql_secure_installation
+
+  # Ajouter un utilisateur avec les permissions requises
+  read -p "Voulez vous créer un utilisateur administrateur ? (y/n)" create_admin_account
+  if [[ "$create_admin_account" == "y" ]]; then
+  read -p "Entrez le nom d'utilisateur de votre compte :" new_admin_user
+  read -s -p "Entrez le mot de passe de votre compte :" new_pass_user
+    sudo mysql -e "CREATE USER '${new_admin_user}'@'%' IDENTIFIED BY '${new_pass_user}';"
+    sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${new_admin_user}'@'%' WITH GRANT OPTION;"
+  fi
+  echo -e "${BLUE}L'installation de votre serveur MariaDB à été éffectué correctement."
+}
+
 
 # Afficher le menu et demander à l'utilisateur de saisir une option
 while true
@@ -190,6 +210,9 @@ do
       create_fivem_server
       ;;
     7)
+      setup_mariadb_server
+      ;;
+    8)
       echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools."
       exit 0
       ;;
