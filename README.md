@@ -11,5 +11,5 @@ chmod +x script.sh
 ## Lancement
 
 ```bash
-./start.sh
+./script.sh
 ```
