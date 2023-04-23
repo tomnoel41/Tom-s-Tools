@@ -286,8 +286,10 @@ setup_mariadb_server() {
 
 install_nginx_php() {
     # Installer Nginx
+    read -p "Voulez vous supprimer la configuration par défaut ? (y/n)" delete_default
     sudo apt-get update
     sudo apt-get install -y nginx
+    sudo apt-get install python3-certbot-nginx -y
 
     sudo apt -y install software-properties-common
     sudo add-apt-repository -y ppa:ondrej/php
@@ -295,10 +297,14 @@ install_nginx_php() {
     sudo apt-get install -y php7.4-fpm php7.4-common php7.4-mysql php7.4-gd php7.4-json php7.4-cli
 
     # Configurer Nginx pour utiliser PHP-FPM
-    sudo mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup
-    sudo touch /etc/nginx/sites-available/default
-    sudo sh -c 'echo "<h1>Bienvenue sur votre serveur Nginx par Toms Tools.sh !</h1>" > /var/www/html/index.html'
-    sudo echo "
+    if [[ "$delete_default" == "y" ]]; then
+      rm /etc/nginx/sites-enabled/default
+      rm /etc/nginx/sites-available/default
+    else
+      sudo mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup
+      sudo touch /etc/nginx/sites-available/default
+      sudo sh -c 'echo "<h1>Bienvenue sur votre serveur Nginx !</h1></br><h2>by Toms Tools.</h2>" > /var/www/html/index.html'
+      sudo echo "
       server {
         listen 80 default_server;
         listen [::]:80 default_server;
@@ -314,12 +320,95 @@ install_nginx_php() {
         }
       }" | sudo tee /etc/nginx/sites-available/default > /dev/null
     sudo systemctl restart nginx.service
+    fi
 }
 
 install_phpmyadmin() {
-  apt install zip unzip -y
+  if ! command -v unzip &> /dev/null; then
+    echo "Unzip n'est pas installé. Installation en cours...${NC}"
+    sudo apt-get update
+    apt install zip unzip -y
+  fi
   export PHPMYADMIN_VERSION=$(curl --silent https://www.phpmyadmin.net/downloads/ | grep "btn btn-success download_popup" | sed -n 's/.*href="\([^"]*\).*/\1/p' | tr '/' '\n' | grep -E '^.*[0-9]+\.[0-9]+\.[0-9]+$')
-  cd /var/www/html && wget https://files.phpmyadmin.net/phpMyAdmin/$PHPMYADMIN_VERSION/phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && unzip phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && rm phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && mv phpMyAdmin-$PHPMYADMIN_VERSION-all-languages pma
+  read -p "Souhaitez-vous utiliser un nom de domaine ? (y/n)" domain_boolean
+  if [[ "$domain_boolean" == "y" ]]; then
+    apt install python3-certbot-nginx -y
+    echo -e "${RED}Attention, le nom de domaine doit pointer vers l'adresse IP du serveur.${NC}"
+    read -p "Entrez le nom de domaine que vous souhaitez utiliser: " domain
+    read -p "Entrez le répertoire d'installation : (exemple : /var/www/phpmyadmin)" repertoire
+    certbot --nginx -d $domain
+    mkdir $repertoire
+    cd $repertoire && wget https://files.phpmyadmin.net/phpMyAdmin/$PHPMYADMIN_VERSION/phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && unzip phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && rm phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && mv phpMyAdmin-$PHPMYADMIN_VERSION-all-languages pma
+    cd pma
+    mv * $repertoire
+    cd $repertoire
+    rm -r pma
+    cat << EOF | sudo tee /etc/nginx/sites-enabled/phpmyadmin.conf > /dev/null
+server {
+    listen 80;
+    server_name $domain;
+    return 301 https://\$server_name\$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name $domain;
+
+    root /var/www/phpmyadmin;
+    index index.php;
+
+    # allow larger file uploads and longer script runtimes
+    client_max_body_size 100m;
+    client_body_timeout 120s;
+
+    sendfile off;
+
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/$domain/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$domain/privkey.pem;
+    ssl_session_cache shared:SSL:10m;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256';
+    ssl_prefer_server_ciphers on;
+
+    # See https://hstspreload.org/ before uncommenting the line below.
+    # add_header Strict-Transport-Security "max-age=15768000; preload;";
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Robots-Tag none;
+    add_header Content-Security-Policy "frame-ancestors 'self'";
+    add_header X-Frame-Options DENY;
+    add_header Referrer-Policy same-origin;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param PHP_VALUE "upload_max_filesize = 100M \n post_max_size=100M";
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        fastcgi_param HTTP_PROXY "";
+        fastcgi_intercept_errors off;
+        fastcgi_buffer_size 16k;
+        fastcgi_buffers 4 16k;
+        fastcgi_connect_timeout 300;
+        fastcgi_send_timeout 300;
+        fastcgi_read_timeout 300;
+        include /etc/nginx/fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+EOF
+  else
+    cd /var/www/html && wget https://files.phpmyadmin.net/phpMyAdmin/$PHPMYADMIN_VERSION/phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && unzip phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && rm phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && mv phpMyAdmin-$PHPMYADMIN_VERSION-all-languages pma
+  fi
   systemctl restart nginx
   echo -e "${BLUE}L'installation de votre PhpMyAdmin à été éffectué correctement.${NC}"
 }
