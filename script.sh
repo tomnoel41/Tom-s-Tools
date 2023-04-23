@@ -31,7 +31,7 @@ Version : ${VERSION}
   echo -e "${YELLOW} ---------------------------------------- ${RED}SERVEURS WEB  ${YELLOW}---------------------------------------"
   echo -e "${BLUE}[9] ${NC}Installer un serveur ${BLUE}Nginx"
   echo -e "${BLUE}[10] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [7 + 9])"
-  echo -e "${YELLOW} --------------------------------- ${BLUE}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
+  echo -e "${YELLOW} --------------------------------- ${RED}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
   echo -e "${BLUE}[11] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
   echo -e "${BLUE}[12] ${NC}Quitter l'instance Tom's Tools"
