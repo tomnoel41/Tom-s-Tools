@@ -4,7 +4,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 RED='\033[31m'
 NC='\033[0m'
-VERSION='v1.4.0'
+VERSION='v2'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
@@ -28,14 +28,15 @@ Version : ${VERSION}
   echo -e "${BLUE}[6] ${NC}Créer et lancer un serveur ${BLUE}Minecraft"
   echo -e "${BLUE}[7] ${NC}Créer et lancer un serveur ${BLUE}Bungeecord"
   echo -e "${BLUE}[8] ${NC}Créer et lancer un serveur ${BLUE}FiveM"
+  echo -e "${BLUE}[9] ${NC}Installer le panel de gestion de serveurs ${BLUE}Pterodactyl"
   echo -e "${YELLOW} ---------------------------------------- ${RED}SERVEURS WEB  ${YELLOW}---------------------------------------"
-  echo -e "${BLUE}[9] ${NC}Installer un serveur ${BLUE}Nginx"
-  echo -e "${BLUE}[10] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [9 + 12])"
-  echo -e "${BLUE}[11] ${NC}Installer le gestionnaire d'hébergement web ${BLUE}Plesk"
+  echo -e "${BLUE}[10] ${NC}Installer un serveur ${BLUE}Nginx"
+  echo -e "${BLUE}[11] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [9 + 12])"
+  echo -e "${BLUE}[12] ${NC}Installer le gestionnaire d'hébergement web ${BLUE}Plesk"
   echo -e "${YELLOW} --------------------------------- ${RED}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
-  echo -e "${BLUE}[12] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
+  echo -e "${BLUE}[13] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
-  echo -e "${BLUE}[13] ${NC}Quitter"
+  echo -e "${BLUE}[14] ${NC}Quitter"
   echo -e ""
 }
 
@@ -324,6 +325,158 @@ install_plesk() {
   fi
 }
 
+install_ptero() {
+    echo -e "${RED}Attention! Vous devez d'abbord installer Nginx, MariaDB et PhpMyAdmin !${NC}"
+    echo -e ""
+    read -p "Entrez l'adresse IP du serveur web (exemple : 10.0.10.12):" server_web_ip
+    read -p "Entrez le port à utiliser (exemple : 9443):" server_web_port
+    echo -e ""
+    read -p "Entrez le mot de passe de l'utilisateur Pterodactyl (MariaDB):" pterodactyl_bdd_password
+
+
+
+    apt -y install software-properties-common curl apt-transport-https ca-certificates gnupg
+    LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
+    curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+    echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
+    apt update -y
+    apt-add-repository universe
+    apt -y install php8.1 php8.1-{common,cli,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip} tar unzip git redis-server
+    curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+    mkdir -p /var/www/pterodactyl
+    cd /var/www/pterodactyl
+    curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz
+    tar -xzvf panel.tar.gz
+    chmod -R 755 storage/* bootstrap/cache/
+    sudo mysql -e "CREATE USER 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '${pterodactyl_bdd_password}';"
+    sudo mysql -e "CREATE DATABASE panel;"
+    sudo mysql -e "GRANT ALL PRIVILEGES ON panel.* TO 'pterodactyl'@'127.0.0.1' WITH GRANT OPTION;"
+    sudo mysql -e "FLUSH PRIVILEGES;"
+    cp .env.example .env
+    composer install --no-dev --optimize-autoloader
+    php artisan key:generate --force
+    php artisan p:environment:setup
+    php artisan p:environment:database
+    php artisan migrate --seed --force
+    php artisan p:user:make
+    chown -R www-data:www-data /var/www/pterodactyl/*
+    
+    
+
+    config_file="/etc/systemd/system/pteroq.service"
+
+cat << EOF | sudo tee $config_file > /dev/null
+[Unit]
+Description=Pterodactyl Queue Worker
+After=redis-server.service
+
+[Service]
+User=www-data
+Group=www-data
+Restart=always
+ExecStart=/usr/bin/php /var/www/pterodactyl/artisan queue:work --queue=high,standard,low --sleep=3 --tries=3
+StartLimitInterval=180
+StartLimitBurst=30
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable pteroq.service
+    sudo systemctl start pteroq.service
+
+
+
+
+
+    sudo systemctl enable --now redis-server
+    sudo systemctl enable --now pteroq.service
+    config_file="/etc/nginx/sites-enabled/pterodactyl.conf"
+
+cat << EOF | sudo tee $config_file > /dev/null
+server {
+    listen $server_web_port;
+    server_name $server_web_ip;
+
+    root /var/www/pterodactyl/public;
+    index index.html index.htm index.php;
+    charset utf-8;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    access_log off;
+    error_log  /var/log/nginx/pterodactyl.app-error.log error;
+
+    client_max_body_size 100m;
+    client_body_timeout 120s;
+
+    sendfile off;
+
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param PHP_VALUE "upload_max_filesize = 100M \n post_max_size=100M";
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        fastcgi_param HTTP_PROXY "";
+        fastcgi_intercept_errors off;
+        fastcgi_buffer_size 16k;
+        fastcgi_buffers 4 16k;
+        fastcgi_connect_timeout 300;
+        fastcgi_send_timeout 300;
+        fastcgi_read_timeout 300;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+EOF
+    systemctl restart nginx
+    curl -sSL https://get.docker.com/ | CHANNEL=stable bash
+    systemctl enable --now docker
+    GRUB_CMDLINE_LINUX_DEFAULT="swapaccount=1"
+    mkdir -p /etc/pterodactyl
+    curl -L -o /usr/local/bin/wings "https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
+    chmod u+x /usr/local/bin/wings
+    
+
+    config_file="/etc/systemd/system/wings.service"
+
+cat << EOF | sudo tee $config_file > /dev/null
+[Unit]
+Description=Pterodactyl Wings Daemon
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+User=root
+WorkingDirectory=/etc/pterodactyl
+LimitNOFILE=4096
+PIDFile=/var/run/wings/daemon.pid
+ExecStart=/usr/local/bin/wings
+Restart=on-failure
+StartLimitInterval=180
+StartLimitBurst=30
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    sudo systemctl daemon-reload
+    systemctl enable --now wings
+}
+
 
 # Afficher le menu et demander à l'utilisateur de saisir une option
 while true
@@ -358,18 +511,21 @@ do
       create_fivem_server
       ;;
     9)
-      install_nginx_php
+      install_ptero
       ;;
     10)
-      install_phpmyadmin
+      install_nginx_php
       ;;
     11)
-      install_plesk
+      install_phpmyadmin
       ;;
     12)
-      setup_mariadb_server
+      install_plesk
       ;;
     13)
+      setup_mariadb_server
+      ;;
+    14)
       echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools.${NC}"
       exit 0
       ;;
