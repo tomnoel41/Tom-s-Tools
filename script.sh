@@ -4,7 +4,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 RED='\033[31m'
 NC='\033[0m'
-VERSION='v2'
+VERSION='v4.1'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
@@ -29,14 +29,15 @@ Version : ${VERSION}
   echo -e "${BLUE}[7] ${NC}Créer et lancer un serveur ${BLUE}Bungeecord"
   echo -e "${BLUE}[8] ${NC}Créer et lancer un serveur ${BLUE}FiveM"
   echo -e "${BLUE}[9] ${NC}Installer le panel de gestion de serveurs ${BLUE}Pterodactyl ${RED}(require Nginx & MariaDB & PhpMyAdmin)"
+  echo -e "${BLUE}[10] ${NC}Mettre à jours ${BLUE}Pterodactyl"
   echo -e "${YELLOW} ---------------------------------------- ${RED}SERVEURS WEB  ${YELLOW}---------------------------------------"
-  echo -e "${BLUE}[10] ${NC}Installer un serveur ${BLUE}Nginx"
-  echo -e "${BLUE}[11] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB)"
-  echo -e "${BLUE}[12] ${NC}Installer le gestionnaire d'hébergement web ${BLUE}Plesk"
+  echo -e "${BLUE}[11] ${NC}Installer un serveur ${BLUE}Nginx"
+  echo -e "${BLUE}[12] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB)"
+  echo -e "${BLUE}[13] ${NC}Installer le gestionnaire d'hébergement web ${BLUE}Plesk"
   echo -e "${YELLOW} --------------------------------- ${RED}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
-  echo -e "${BLUE}[13] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
+  echo -e "${BLUE}[14] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
-  echo -e "${BLUE}[14] ${NC}Quitter"
+  echo -e "${BLUE}[15] ${NC}Quitter"
   echo -e ""
 }
 
@@ -477,6 +478,21 @@ EOF
     systemctl enable --now wings
 }
 
+update_ptero() {
+  cd /var/www/pterodactyl
+  php artisan down
+  curl -L https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz | tar -xzv
+  chmod -R 755 storage/* bootstrap/cache
+  composer install --no-dev --optimize-autoloader
+  php artisan view:clear
+  php artisan config:clear
+  php artisan migrate --seed --force
+  chown -R www-data:www-data /var/www/pterodactyl/*
+  php artisan queue:restart
+  php artisan up
+  echo -e "${YELLOW}La mise à jours de Pterodactyl a été éffectué.${NC}"
+}
+
 
 # Afficher le menu et demander à l'utilisateur de saisir une option
 while true
@@ -514,18 +530,21 @@ do
       install_ptero
       ;;
     10)
-      install_nginx_php
+      update_ptero
       ;;
     11)
-      install_phpmyadmin
+      install_nginx_php
       ;;
     12)
-      install_plesk
+      install_phpmyadmin
       ;;
     13)
-      setup_mariadb_server
+      install_plesk
       ;;
     14)
+      setup_mariadb_server
+      ;;
+    15)
       echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools.${NC}"
       exit 0
       ;;
