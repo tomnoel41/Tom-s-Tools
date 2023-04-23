@@ -28,7 +28,7 @@ Version : ${VERSION}
   echo -e "${BLUE}[6] ${NC}Créer et lancer un serveur ${BLUE}Minecraft"
   echo -e "${BLUE}[7] ${NC}Créer et lancer un serveur ${BLUE}Bungeecord"
   echo -e "${BLUE}[8] ${NC}Créer et lancer un serveur ${BLUE}FiveM"
-  echo -e "${BLUE}[9] ${NC}Installer le panel de gestion de serveurs ${BLUE}Pterodactyl"
+  echo -e "${BLUE}[9] ${NC}Installer le panel de gestion de serveurs ${BLUE}Pterodactyl ${RED}(require Nginx & MariaDB & PhpMyAdmin)"
   echo -e "${YELLOW} ---------------------------------------- ${RED}SERVEURS WEB  ${YELLOW}---------------------------------------"
   echo -e "${BLUE}[10] ${NC}Installer un serveur ${BLUE}Nginx"
   echo -e "${BLUE}[11] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [9 + 12])"
