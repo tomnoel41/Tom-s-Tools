@@ -31,7 +31,7 @@ Version : ${VERSION}
   echo -e "${BLUE}[9] ${NC}Installer le panel de gestion de serveurs ${BLUE}Pterodactyl ${RED}(require Nginx & MariaDB & PhpMyAdmin)"
   echo -e "${YELLOW} ---------------------------------------- ${RED}SERVEURS WEB  ${YELLOW}---------------------------------------"
   echo -e "${BLUE}[10] ${NC}Installer un serveur ${BLUE}Nginx"
-  echo -e "${BLUE}[11] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [9 + 12])"
+  echo -e "${BLUE}[11] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB)"
   echo -e "${BLUE}[12] ${NC}Installer le gestionnaire d'hébergement web ${BLUE}Plesk"
   echo -e "${YELLOW} --------------------------------- ${RED}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
   echo -e "${BLUE}[13] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
