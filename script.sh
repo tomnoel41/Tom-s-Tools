@@ -53,6 +53,12 @@ if ! command -v curl &> /dev/null; then
     sudo apt-get update
     apt install curl -y
 fi
+if ! command -v sudo &> /dev/null; then
+    clear
+    echo "Sudo n'est pas installé. Installation en cours...${NC}"
+    sudo apt-get update
+    apt install sudo -y
+fi
 clear
 echo -e "${YELLOW}Vérification des mises à jour...${NC}"
 latest_version=$(curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/last_version.txt)
