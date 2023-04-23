@@ -2,12 +2,13 @@
 
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
+RED='\033[31m'
 NC='\033[0m'
 VERSION='v1.3.2'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
-  echo -e "${YELLOW}
+  echo -e "${RED}
   
 ████████╗░█████╗░███╗░░░███╗██╗░██████╗  ████████╗░█████╗░░█████╗░██╗░░░░░░██████╗░░░░██████╗██╗░░██╗
 ╚══██╔══╝██╔══██╗████╗░████║╚█║██╔════╝  ╚══██╔══╝██╔══██╗██╔══██╗██║░░░░░██╔════╝░░░██╔════╝██║░░██║
@@ -19,7 +20,7 @@ display_menu() {
   echo -e "${YELLOW}Voici les options disponible sur la version actuel du script, que voulez-vous faire ?"
   echo -e "${BLUE}1. ${YELLOW}Mettre à jour le système"
   echo -e "${BLUE}2. ${YELLOW}Installer des packages de base ${BLUE}(bash, curl, sudo, wget, nload, htop, git)"
-  echo -e "${BLUE}3. ${YELLOW}Installer l'utilitaire Speedtest ${BLUE}(Ookla)"
+  echo -e "${BLUE}3. ${YELLOW}Installer l'utilitaire ${BLUE}Speedtest (Ookla)"
   echo -e "${BLUE}4. ${YELLOW}Créer un nouvel utilisateur"
   echo -e "${BLUE}5. ${YELLOW}Tout faire ${BLUE}(1, 2 et 3)"
   echo -e "${YELLOW} -------------------------------------- ${BLUE}SERVEURS DE JEUX ${YELLOW}--------------------------------------"
@@ -38,7 +39,7 @@ display_menu() {
 
 # Vérification des mises à jour
 if ! command -v curl &> /dev/null; then
-    echo "Curl n'est pas installé. Installation en cours..."
+    echo "Curl n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     apt install curl -y
 fi
@@ -94,6 +95,9 @@ install_speedtest() {
   if ! command -v speedtest &> /dev/null; then
     curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
     sudo apt-get install speedtest
+    echo -e "${YELLOW}Speedtest à été installé avec succès ! (exemple : speedtest -s 24215)${NC}"
+  else
+    echo -e "${YELLOW}Speedtest est déjà installé sur votre serveur !${NC}"
   fi
 }
 
@@ -312,11 +316,11 @@ do
       setup_mariadb_server
       ;;
     12)
-      echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools."
+      echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools.${NC}"
       exit 0
       ;;
     *)
-      echo "Option invalide. Veuillez choisir une option valide."
+      echo "Option invalide. Veuillez choisir une option valide.${NC}"
       ;;
   esac
 done
