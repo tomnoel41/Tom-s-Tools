@@ -1,5 +1,5 @@
 # Tom's Tools
-![image](https://user-images.githubusercontent.com/98286538/233841084-fda1c0d9-fe48-453d-9ad4-cdfe78f966a2.png)
+![image](https://user-images.githubusercontent.com/98286538/233841252-c9d84ed8-eb40-40e1-8f11-c98843a577cd.png)
 
 Tom's Tools est un script bash (.sh) conçu pour Linux qui permet d'automatiser une variété de tâches courantes, telles que l'installation de serveurs de jeux tels que FiveM et Minecraft, l'installation de serveurs de gestion web comme Plesk, et l'installation de logiciels tels que Nginx, MariaDB et PhpMyAdmin. Il permet également de mettre à jour le système, d'installer des packages de base et de créer des utilisateurs avec des permissions personnalisées. En somme, Tom's Tools est un outil pratique et polyvalent pour les administrateurs système et les développeurs qui cherchent à gagner du temps en automatisant des tâches fastidieuses et répétitives.
 
