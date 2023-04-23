@@ -4,7 +4,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 RED='\033[31m'
 NC='\033[0m'
-VERSION='v4.1'
+VERSION='v4.2'
 IP=$(hostname -I)
 HOSTNAME=$(hostname)
 
@@ -28,19 +28,27 @@ Hostname : ${HOSTNAME}
   echo -e "${BLUE}[3] ${NC}Installer l'utilitaire ${BLUE}Speedtest (Ookla)"
   echo -e "${BLUE}[4] ${NC}Créer un nouvel utilisateur"
   echo -e "${BLUE}[5] ${NC}Tout faire ${BLUE}(1, 2 et 4)"
+  echo -e ""
   echo -e "${YELLOW} -------------------------------------- ${RED}SERVEURS DE JEUX ${YELLOW}--------------------------------------"
+  echo -e ""
   echo -e "${BLUE}[6] ${NC}Créer et lancer un serveur ${BLUE}Minecraft"
   echo -e "${BLUE}[7] ${NC}Créer et lancer un serveur ${BLUE}Bungeecord"
   echo -e "${BLUE}[8] ${NC}Créer et lancer un serveur ${BLUE}FiveM"
   echo -e "${BLUE}[9] ${NC}Installer le panel de gestion de serveurs ${BLUE}Pterodactyl ${RED}(require Nginx & MariaDB & PhpMyAdmin)"
   echo -e "${BLUE}[10] ${NC}Mettre à jours ${BLUE}Pterodactyl"
+  echo -e ""
   echo -e "${YELLOW} ---------------------------------------- ${RED}SERVEURS WEB  ${YELLOW}---------------------------------------"
+  echo -e ""
   echo -e "${BLUE}[11] ${NC}Installer un serveur ${BLUE}Nginx"
   echo -e "${BLUE}[12] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB)"
   echo -e "${BLUE}[13] ${NC}Installer le gestionnaire d'hébergement web ${BLUE}Plesk"
-  echo -e "${YELLOW} --------------------------------- ${RED}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
+  echo -e ""
+  echo -e "${YELLOW} --------------------------------- ${RED}SERVEURS DE BASE DE DONNEES  ${YELLOW}--------------------------------"
+  echo -e ""
   echo -e "${BLUE}[14] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
+  echo -e ""
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
+  echo -e ""
   echo -e "${BLUE}[15] ${NC}Quitter"
   echo -e ""
 }
@@ -329,6 +337,7 @@ install_phpmyadmin() {
     sudo apt-get update
     apt install zip unzip -y
   fi
+  apt -y install php8.1 php8.1-{common,cli,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip} tar git redis-server
   export PHPMYADMIN_VERSION=$(curl --silent https://www.phpmyadmin.net/downloads/ | grep "btn btn-success download_popup" | sed -n 's/.*href="\([^"]*\).*/\1/p' | tr '/' '\n' | grep -E '^.*[0-9]+\.[0-9]+\.[0-9]+$')
   read -p "Souhaitez-vous utiliser un nom de domaine ? (y/n)" domain_boolean
   if [[ "$domain_boolean" == "y" ]]; then
@@ -428,12 +437,16 @@ install_plesk() {
 install_ptero() {
     echo -e "${RED}Attention! Vous devez d'abbord installer Nginx, MariaDB et PhpMyAdmin !${NC}"
     echo -e ""
-    read -p "Entrez l'adresse IP du serveur web (exemple : 10.0.10.12):" server_web_ip
-    read -p "Entrez le port à utiliser (exemple : 9443):" server_web_port
+    read -p "Voulez-vous utiliser un nom de domaine pour le Pterodactyl ? (y/n)" ptero_domain_boolean
+    if [[ "$ptero_domain_boolean" == "y" ]]; then
+      echo $e "${RED}Attention, le nom de domaine doit pointé vers l'adresse IP du serveur."
+      read -p "Entrez le nom de domaine: " ptero_domain
+    else
+      read -p "Entrez l'adresse IP du serveur web (exemple : 10.0.10.12):" ptero_without_ssl_ip
+      read -p "Entrez le port à utiliser (exemple : 9443):" ptero_without_ssl_port
+    fi
     echo -e ""
-    read -p "Entrez le mot de passe de l'utilisateur Pterodactyl (MariaDB):" pterodactyl_bdd_password
-
-
+    read -p "Entrez le mot de passe de l'utilisateur Pterodactyl (MariaDB) : " pterodactyl_bdd_password
 
     apt -y install software-properties-common curl apt-transport-https ca-certificates gnupg
     LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
@@ -493,12 +506,82 @@ EOF
 
     sudo systemctl enable --now redis-server
     sudo systemctl enable --now pteroq.service
-    config_file="/etc/nginx/sites-enabled/pterodactyl.conf"
-
-cat << EOF | sudo tee $config_file > /dev/null
+    if [[ "$ptero_domain_boolean" == "y" ]]; then
+      sudo apt update -y
+      sudo apt install python3-certbot-nginx -y
+      certbot --nginx -d $ptero_domain
+      cat << EOF | sudo tee /etc/nginx/sites-enabled/pterodactyl.conf > /dev/null
+server_tokens off;
 server {
-    listen $server_web_port;
-    server_name $server_web_ip;
+    listen 80;
+    server_name $ptero_domain;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name $ptero_domain;
+
+    root /var/www/pterodactyl/public;
+    index index.php;
+
+    access_log /var/log/nginx/pterodactyl.app-access.log;
+    error_log  /var/log/nginx/pterodactyl.app-error.log error;
+
+    # allow larger file uploads and longer script runtimes
+    client_max_body_size 100m;
+    client_body_timeout 120s;
+
+    sendfile off;
+
+    # SSL Configuration - Replace the example $ptero_domain with your domain
+    ssl_certificate /etc/letsencrypt/live/$ptero_domain/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$ptero_domain/privkey.pem;
+    ssl_session_cache shared:SSL:10m;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384";
+    ssl_prefer_server_ciphers on;
+
+    # See https://hstspreload.org/ before uncommenting the line below.
+    # add_header Strict-Transport-Security "max-age=15768000; preload;";
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Robots-Tag none;
+    add_header Content-Security-Policy "frame-ancestors 'self'";
+    add_header X-Frame-Options DENY;
+    add_header Referrer-Policy same-origin;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param PHP_VALUE "upload_max_filesize = 100M \n post_max_size=100M";
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        fastcgi_param HTTP_PROXY "";
+        fastcgi_intercept_errors off;
+        fastcgi_buffer_size 16k;
+        fastcgi_buffers 4 16k;
+        fastcgi_connect_timeout 300;
+        fastcgi_send_timeout 300;
+        fastcgi_read_timeout 300;
+        include /etc/nginx/fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+EOF
+    else
+      cat << EOF | sudo tee /etc/nginx/sites-enabled/pterodactyl.conf > /dev/null
+server {
+    listen $ptero_without_ssl_port;
+    server_name $ptero_without_ssl_ip;
 
     root /var/www/pterodactyl/public;
     index index.html index.htm index.php;
@@ -540,6 +623,7 @@ server {
     }
 }
 EOF
+    fi
     systemctl restart nginx
     curl -sSL https://get.docker.com/ | CHANNEL=stable bash
     systemctl enable --now docker
@@ -547,11 +631,7 @@ EOF
     mkdir -p /etc/pterodactyl
     curl -L -o /usr/local/bin/wings "https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
     chmod u+x /usr/local/bin/wings
-    
-
-    config_file="/etc/systemd/system/wings.service"
-
-cat << EOF | sudo tee $config_file > /dev/null
+    cat << EOF | sudo tee /etc/systemd/system/wings.service > /dev/null
 [Unit]
 Description=Pterodactyl Wings Daemon
 After=docker.service
