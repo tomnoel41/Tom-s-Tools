@@ -3,7 +3,7 @@
 YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 NC='\033[0m'
-VERSION='v1.3.0'
+VERSION='v1.3.2'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
