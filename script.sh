@@ -4,7 +4,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 RED='\033[31m'
 NC='\033[0m'
-VERSION='v1.3.5'
+VERSION='v1.4.0'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
@@ -223,8 +223,41 @@ create_fivem_server() {
 setup_mariadb_server() {
   # Installation de MariaDB
   sudo apt-get update -y
-  sudo apt-get install mariadb-server -y
+  sudo apt-get upgrade -y
 
+  # Détection de la version de Linux
+  if [[ -e /etc/debian_version ]]; then
+    DISTRO=$(lsb_release -is)
+    VERSION=$(lsb_release -rs | cut -d. -f1)
+  elif [[ -e /etc/lsb-release ]]; then
+    DISTRO=$(grep DISTRIB_ID /etc/lsb-release | awk -F= '{print $2}')
+    VERSION=$(grep DISTRIB_RELEASE /etc/lsb-release | awk -F= '{print $2}' | cut -d. -f1)
+  else
+    echo "Distribution non prise en charge."
+    exit 1
+  fi
+
+  # Ajout du référentiel MariaDB approprié
+  if [[ $DISTRO == "Ubuntu" && $VERSION -ge 20 ]]; then
+    # Ajout du référentiel MariaDB 11.0 pour Ubuntu 20.04 ou version ultérieure
+    sudo apt-get install -y software-properties-common
+    sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+    sudo add-apt-repository 'deb [arch=amd64] http://mirror.zol.co.zw/mariadb/repo/11.0/ubuntu focal main'
+  elif [[ $DISTRO == "Ubuntu" && $VERSION -lt 20 ]]; then
+    # Ajout du référentiel MariaDB 11.0 pour Ubuntu 18.04 ou version antérieure
+    sudo apt-get install -y software-properties-common
+    sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+    sudo add-apt-repository 'deb [arch=amd64] http://mirror.zol.co.zw/mariadb/repo/11.0/ubuntu bionic main'
+  elif [[ $DISTRO == "Debian" && $VERSION -ge 10 ]]; then
+    # Ajout du référentiel MariaDB 11.0 pour Debian 10 ou version ultérieure
+    sudo apt-get install -y software-properties-common dirmngr gnupg2
+    sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+    sudo add-apt-repository 'deb [arch=amd64] http://mirror.zol.co.zw/mariadb/repo/11.0/debian buster main'
+  else
+    echo "Version non prise en charge de la distribution Linux."
+    exit 1
+  fi
+  apt install mariadb-server -y
   # Configuration de MariaDB
   sudo mysql_secure_installation
 
