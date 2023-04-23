@@ -23,14 +23,15 @@ display_menu() {
   echo -e "${BLUE}4. ${YELLOW}Tout faire ${BLUE}(1, 2 et 3)"
   echo -e "${YELLOW} -------------------------------------- ${BLUE}SERVEURS DE JEUX ${YELLOW}--------------------------------------"
   echo -e "${BLUE}5. ${YELLOW}Créer et lancer un serveur ${BLUE}Minecraft"
-  echo -e "${BLUE}6. ${YELLOW}Créer et lancer un serveur ${BLUE}FiveM"
+  echo -e "${BLUE}6. ${YELLOW}Créer et lancer un serveur ${BLUE}Bungeecord"
+  echo -e "${BLUE}7. ${YELLOW}Créer et lancer un serveur ${BLUE}FiveM"
   echo -e "${YELLOW} ---------------------------------------- ${BLUE}SERVEURS WEB  ${YELLOW}---------------------------------------"
-  echo -e "${BLUE}7. ${YELLOW}Installer un serveur ${BLUE}Nginx"
-  echo -e "${BLUE}8. ${YELLOW}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [7 + 9])"
+  echo -e "${BLUE}8. ${YELLOW}Installer un serveur ${BLUE}Nginx"
+  echo -e "${BLUE}9. ${YELLOW}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [7 + 9])"
   echo -e "${YELLOW} --------------------------------- ${BLUE}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
-  echo -e "${BLUE}9. ${YELLOW}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
+  echo -e "${BLUE}10. ${YELLOW}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
-  echo -e "${BLUE}10. ${YELLOW}Quitter (Bye bye)"
+  echo -e "${BLUE}11. ${YELLOW}Quitter (Bye bye)"
 }
 
 
@@ -112,6 +113,39 @@ create_minecraft_server() {
 
   echo "eula=true" > eula.txt
   echo "sudo java -Xmx${max_ram}M -Xms1024M -jar spigot-${version}.jar nogui" > start.sh
+
+  # Rendre éxécutable le start.sh
+  chmod +x start.sh
+  read -p "Voulez vous lancer le serveur ? (y/n)" launch
+  if [[ "$launch" == "y" ]]; then
+    sudo bash start.sh
+  fi
+  if [[ "$launch" == "n" ]]; then
+    echo -e "${BLUE}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './start.sh' dans le répertoire du serveur.${NC}"
+  fi
+}
+
+create_bungeecord_server() {
+  # Vérifier si Java est installé
+  if ! command -v java &> /dev/null; then
+    echo "Java n'est pas installé. Installation en cours...${NC}"
+    sudo apt-get update
+    sudo apt-get install openjdk-17-jdk openjdk-17-jre -y
+  fi
+
+  # Demander à l'utilisateur la RAM max qu'il veut
+  read -p "Veuillez entrer la valeur maximum de la RAM que vous souhaitez (par exemple, '4096' pour 4GB):" max_ram
+  
+  # Créer un dossier pour le serveur
+  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur:" server_path
+  sudo mkdir -p $server_path
+  cd $server_path
+  
+  # Télécharger le fichier Spigot.jar
+  sudo wget https://ci.md-5.net/job/BungeeCord/lastSuccessfulBuild/artifact/bootstrap/target/BungeeCord.jar
+
+  echo "eula=true" > eula.txt
+  echo "sudo java -Xmx${max_ram}M -Xms1024M -jar BungeeCord.jar nogui" > start.sh
 
   # Rendre éxécutable le start.sh
   chmod +x start.sh
@@ -252,18 +286,21 @@ do
       create_minecraft_server
       ;;
     6)
-      create_fivem_server
+      create_bungeecord_server
       ;;
     7)
-      install_nginx_php
+      create_fivem_server
       ;;
     8)
-      install_phpmyadmin
+      install_nginx_php
       ;;
     9)
-      setup_mariadb_server
+      install_phpmyadmin
       ;;
     10)
+      setup_mariadb_server
+      ;;
+    11)
       echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools."
       exit 0
       ;;
