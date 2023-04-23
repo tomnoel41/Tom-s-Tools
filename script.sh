@@ -19,19 +19,20 @@ display_menu() {
   echo -e "${YELLOW}Voici les options disponible sur la version actuel du script, que voulez-vous faire ?"
   echo -e "${BLUE}1. ${YELLOW}Mettre à jour le système"
   echo -e "${BLUE}2. ${YELLOW}Installer des packages de base ${BLUE}(bash, curl, sudo, wget, nload, htop, git)"
-  echo -e "${BLUE}3. ${YELLOW}Créer un nouvel utilisateur"
-  echo -e "${BLUE}4. ${YELLOW}Tout faire ${BLUE}(1, 2 et 3)"
+  echo -e "${BLUE}3. ${YELLOW}Installer l'utilitaire Speedtest ${BLUE}(Ookla)"
+  echo -e "${BLUE}4. ${YELLOW}Créer un nouvel utilisateur"
+  echo -e "${BLUE}5. ${YELLOW}Tout faire ${BLUE}(1, 2 et 3)"
   echo -e "${YELLOW} -------------------------------------- ${BLUE}SERVEURS DE JEUX ${YELLOW}--------------------------------------"
-  echo -e "${BLUE}5. ${YELLOW}Créer et lancer un serveur ${BLUE}Minecraft"
-  echo -e "${BLUE}6. ${YELLOW}Créer et lancer un serveur ${BLUE}Bungeecord"
-  echo -e "${BLUE}7. ${YELLOW}Créer et lancer un serveur ${BLUE}FiveM"
+  echo -e "${BLUE}6. ${YELLOW}Créer et lancer un serveur ${BLUE}Minecraft"
+  echo -e "${BLUE}7. ${YELLOW}Créer et lancer un serveur ${BLUE}Bungeecord"
+  echo -e "${BLUE}8. ${YELLOW}Créer et lancer un serveur ${BLUE}FiveM"
   echo -e "${YELLOW} ---------------------------------------- ${BLUE}SERVEURS WEB  ${YELLOW}---------------------------------------"
-  echo -e "${BLUE}8. ${YELLOW}Installer un serveur ${BLUE}Nginx"
-  echo -e "${BLUE}9. ${YELLOW}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [7 + 9])"
+  echo -e "${BLUE}9. ${YELLOW}Installer un serveur ${BLUE}Nginx"
+  echo -e "${BLUE}10. ${YELLOW}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [7 + 9])"
   echo -e "${YELLOW} --------------------------------- ${BLUE}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
-  echo -e "${BLUE}10. ${YELLOW}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
+  echo -e "${BLUE}11. ${YELLOW}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
-  echo -e "${BLUE}11. ${YELLOW}Quitter (Bye bye)"
+  echo -e "${BLUE}12. ${YELLOW}Quitter (Bye bye)"
 }
 
 
@@ -87,6 +88,13 @@ create_user() {
     sudo usermod -aG root $new_user
   fi
   echo "$new_user:$new_password" | sudo chpasswd
+}
+
+install_speedtest() {
+  if ! command -v speedtest &> /dev/null; then
+    curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
+    sudo apt-get install speedtest
+  fi
 }
 
 create_minecraft_server() {
@@ -275,32 +283,35 @@ do
       install_packages
       ;;
     3)
-      create_user
+      install_speedtest
       ;;
     4)
+      create_user
+      ;;
+    5)
       update_system
       install_packages
       create_user
       ;;
-    5)
+    6)
       create_minecraft_server
       ;;
-    6)
+    7)
       create_bungeecord_server
       ;;
-    7)
+    8)
       create_fivem_server
       ;;
-    8)
+    9)
       install_nginx_php
       ;;
-    9)
+    10)
       install_phpmyadmin
       ;;
-    10)
+    11)
       setup_mariadb_server
       ;;
-    11)
+    12)
       echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools."
       exit 0
       ;;
