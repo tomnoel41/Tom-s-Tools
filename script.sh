@@ -282,7 +282,7 @@ install_phpmyadmin() {
 while true
 do
   display_menu
-  read -p "Votre choix : " choice
+  read -p "Choisissez l'option que vous souhaitez : " choice
   case $choice in
     1)
       update_system
