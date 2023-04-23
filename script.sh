@@ -34,7 +34,8 @@ Version : ${VERSION}
   echo -e "${YELLOW} --------------------------------- ${RED}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
   echo -e "${BLUE}[11] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
-  echo -e "${BLUE}[12] ${NC}Quitter l'instance Tom's Tools"
+  echo -e "${BLUE}[12] ${NC}Quitter"
+  echo -e ""
 }
 
 
