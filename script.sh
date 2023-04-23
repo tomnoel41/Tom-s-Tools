@@ -57,13 +57,13 @@ Hostname : ${HOSTNAME}
 # Vérification des mises à jour
 if ! command -v curl &> /dev/null; then
     clear
-    echo "Curl n'est pas installé. Installation en cours...${NC}"
+    echo "curl n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     apt install curl -y
 fi
 if ! command -v sudo &> /dev/null; then
     clear
-    echo "Sudo n'est pas installé. Installation en cours...${NC}"
+    echo "sudo n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     apt install sudo -y
 fi
@@ -73,7 +73,7 @@ latest_version=$(curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools
 if [[ "$latest_version" != "$VERSION" ]]; then
    clear
    echo -e "${YELLOW}Une nouvelle version de ce script est disponible ! (version $latest_version)${NC}"
-   echo -e "${YELLOW}Voulez-vous mettre à jour ? (y/n)${NC}"
+   echo -e "${YELLOW}Voulez-vous mettre à jour ? (y/n): ${NC}"
    read update_script
 
    if [[ "$update_script" == "y" ]]; then
@@ -105,10 +105,9 @@ install_packages() {
 
 # Fonction pour créer un nouvel utilisateur
 create_user() {
-  read -p "Voulez-vous donner les permissions sudo et root à cet utilisateur ? (y/n) :" give_permissions
+  read -p "Voulez-vous donner les permissions sudo et root à cet utilisateur ? (y/n): " give_permissions
   read -p "Veuillez saisir le nom d'utilisateur pour le nouvel utilisateur :" new_user
   read -s -p "Veuillez saisir le mot de passe pour le nouvel utilisateur :" new_password
-  echo
   sudo adduser $new_user --gecos "User"
   if [[ "$give_permissions" == "y" ]]; then
     sudo usermod -aG sudo $new_user
@@ -154,19 +153,19 @@ create_minecraft_server() {
 
   # Rendre éxécutable le start.sh
   chmod +x start.sh
-  read -p "Voulez vous lancer le serveur ? (y/n)" launch
+  read -p "Voulez vous lancer le serveur ? (y/n): " launch
   if [[ "$launch" == "y" ]]; then
     sudo bash start.sh
   fi
   if [[ "$launch" == "n" ]]; then
-    echo -e "${BLUE}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './start.sh' dans le répertoire du serveur.${NC}"
+    echo -e "${YELLOW}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './start.sh' dans le répertoire du serveur.${NC}"
   fi
 }
 
 create_bungeecord_server() {
   # Vérifier si Java est installé
   if ! command -v java &> /dev/null; then
-    echo "Java n'est pas installé. Installation en cours...${NC}"
+    echo "${YELLOW}Java n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     sudo apt-get install openjdk-17-jdk openjdk-17-jre -y
   fi
@@ -187,33 +186,33 @@ create_bungeecord_server() {
 
   # Rendre éxécutable le start.sh
   chmod +x start.sh
-  read -p "Voulez vous lancer le serveur ? (y/n)" launch
+  read -p "Voulez vous lancer le serveur ? (y/n): " launch
   if [[ "$launch" == "y" ]]; then
     sudo bash start.sh
   fi
   if [[ "$launch" == "n" ]]; then
-    echo -e "${BLUE}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './start.sh' dans le répertoire du serveur.${NC}"
+    echo -e "${YELLOW}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './start.sh' dans le répertoire du serveur.${NC}"
   fi
 }
 
 create_fivem_server() {
   # Vérifier si xz-utils est installé
   if ! command -v tar &> /dev/null; then
-    echo "xz-utils n'est pas installé. Installation en cours...${NC}"
+    echo "${YELLOW}xz-utils n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     sudo apt-get install xz-utils -y
   fi
 
   # Vérifier si git est installé
   if ! command -v git &> /dev/null; then
-    echo "git n'est pas installé. Installation en cours...${NC}"
+    echo "${YELLOW}git n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     sudo apt-get install git -y
   fi
 
   # Vérifier si wget est installé
   if ! command -v wget &> /dev/null; then
-    echo "wget n'est pas installé. Installation en cours...${NC}"
+    echo "${YELLOW}wget n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     sudo apt-get install wget -y
   fi
@@ -231,12 +230,12 @@ create_fivem_server() {
   tar -xvf fx.tar.xz && rm fx.tar.xz
 
   # Lancer le serveur
-  read -p "Voulez vous lancer le serveur ? (y/n)" launch
+  read -p "Voulez vous lancer le serveur ? (y/n): " launch
   if [[ "$launch" == "y" ]]; then
     cd ${server_path} && sudo bash run.sh
   fi
   if [[ "$launch" == "n" ]]; then
-    echo -e "${BLUE}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './run.sh' dans le répertoire du serveur.${NC}"
+    echo -e "${YELLOW}D'accord, si vous souhaitez lancer le serveur, vous pouvez utiliser la commande './run.sh' dans le répertoire du serveur.${NC}"
   fi
 }
 
@@ -253,7 +252,7 @@ setup_mariadb_server() {
     DISTRO=$(grep DISTRIB_ID /etc/lsb-release | awk -F= '{print $2}')
     VERSION=$(grep DISTRIB_RELEASE /etc/lsb-release | awk -F= '{print $2}' | cut -d. -f1)
   else
-    echo "Distribution non prise en charge."
+    echo "${YELLOW}Distribution non prise en charge.${NC}"
     exit 1
   fi
 
@@ -274,7 +273,7 @@ setup_mariadb_server() {
     sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
     sudo add-apt-repository 'deb [arch=amd64] http://mirror.zol.co.zw/mariadb/repo/11.0/debian buster main'
   else
-    echo "Version non prise en charge de la distribution Linux."
+    echo "${YELLOW}Version non prise en charge de la distribution Linux.${NC}"
     exit 1
   fi
   apt install mariadb-server -y
@@ -282,23 +281,22 @@ setup_mariadb_server() {
   sudo mysql_secure_installation
 
   # Ajouter un utilisateur avec les permissions requises
-  read -p "Voulez vous créer un utilisateur administrateur ? (y/n)" create_admin_account
+  read -p "Voulez vous créer un utilisateur administrateur ? (y/n): " create_admin_account
   if [[ "$create_admin_account" == "y" ]]; then
   read -p "Entrez le nom d'utilisateur de votre compte:" new_admin_user
   read -s -p "Entrez le mot de passe de votre compte:" new_pass_user
     sudo mysql -e "CREATE USER '${new_admin_user}'@'%' IDENTIFIED BY '${new_pass_user}';"
     sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${new_admin_user}'@'%' WITH GRANT OPTION;"
   fi
-  echo -e "${BLUE}L'installation de votre serveur MariaDB à été éffectué correctement.${NC}"
+  echo -e "${YELLOW}L'installation de votre serveur MariaDB à été éffectué correctement.${NC}"
 }
 
 install_nginx_php() {
     # Installer Nginx
-    read -p "Voulez vous supprimer la configuration par défaut ? (y/n)" delete_default
+    read -p "Voulez vous supprimer la configuration par défaut de nginx ? (y/n): " delete_default
     sudo apt-get update
     sudo apt-get install -y nginx
     sudo apt-get install python3-certbot-nginx -y
-
     sudo apt -y install software-properties-common
     sudo add-apt-repository -y ppa:ondrej/php
     sudo apt-get update
@@ -333,13 +331,13 @@ install_nginx_php() {
 
 install_phpmyadmin() {
   if ! command -v unzip &> /dev/null; then
-    echo "Unzip n'est pas installé. Installation en cours...${NC}"
+    echo "${YELLOW}Unzip n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     apt install zip unzip -y
   fi
   apt -y install php8.1 php8.1-{common,cli,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip} tar git redis-server
   export PHPMYADMIN_VERSION=$(curl --silent https://www.phpmyadmin.net/downloads/ | grep "btn btn-success download_popup" | sed -n 's/.*href="\([^"]*\).*/\1/p' | tr '/' '\n' | grep -E '^.*[0-9]+\.[0-9]+\.[0-9]+$')
-  read -p "Souhaitez-vous utiliser un nom de domaine ? (y/n)" domain_boolean
+  read -p "Souhaitez-vous utiliser un nom de domaine ? (y/n): " domain_boolean
   if [[ "$domain_boolean" == "y" ]]; then
     apt install python3-certbot-nginx -y
     echo -e "${RED}Attention, le nom de domaine doit pointer vers l'adresse IP du serveur.${NC}"
@@ -419,7 +417,7 @@ EOF
     cd /var/www/html && wget https://files.phpmyadmin.net/phpMyAdmin/$PHPMYADMIN_VERSION/phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && unzip phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && rm phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && mv phpMyAdmin-$PHPMYADMIN_VERSION-all-languages pma
   fi
   systemctl restart nginx
-  echo -e "${BLUE}L'installation de votre PhpMyAdmin à été éffectué correctement.${NC}"
+  echo -e "${YELLOW}L'installation de votre PhpMyAdmin à été éffectué correctement.${NC}"
 }
 
 install_plesk() {
@@ -430,14 +428,14 @@ install_plesk() {
     fi
     sh <(curl https://autoinstall.plesk.com/one-click-installer || wget -O - https://autoinstall.plesk.com/one-click-installer)
   else
-    echo -e "${BLUE}Plesk est déjà installé sur le système.${NC}"
+    echo -e "${YELLOW}Plesk est déjà installé sur le système.${NC}"
   fi
 }
 
 install_ptero() {
     echo -e "${RED}Attention! Vous devez d'abbord installer Nginx, MariaDB et PhpMyAdmin !${NC}"
     echo -e ""
-    read -p "Voulez-vous utiliser un nom de domaine pour le Pterodactyl ? (y/n)" ptero_domain_boolean
+    read -p "Voulez-vous utiliser un nom de domaine pour le Pterodactyl ? (y/n): " ptero_domain_boolean
     if [[ "$ptero_domain_boolean" == "y" ]]; then
       echo $e "${RED}Attention, le nom de domaine doit pointé vers l'adresse IP du serveur."
       read -p "Entrez le nom de domaine: " ptero_domain
@@ -724,11 +722,11 @@ do
       setup_mariadb_server
       ;;
     15)
-      echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools.${NC}"
+      echo "${YELLOW}Merci d'avoir utiliser le script d'installation Linux de Tom's Tools.${NC}"
       exit 0
       ;;
     *)
-      echo "Option invalide. Veuillez choisir une option valide.${NC}"
+      echo "${YELLOW}Option invalide. Veuillez choisir une option valide.${NC}"
       ;;
   esac
 done
