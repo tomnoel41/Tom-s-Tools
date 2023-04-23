@@ -4,7 +4,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 RED='\033[31m'
 NC='\033[0m'
-VERSION='v1.3.4'
+VERSION='v1.3.5'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
@@ -31,10 +31,11 @@ Version : ${VERSION}
   echo -e "${YELLOW} ---------------------------------------- ${RED}SERVEURS WEB  ${YELLOW}---------------------------------------"
   echo -e "${BLUE}[9] ${NC}Installer un serveur ${BLUE}Nginx"
   echo -e "${BLUE}[10] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [7 + 9])"
+  echo -e "${BLUE}[11] ${NC}Installer le gestionnaire d'hébergement web ${BLUE}Plesk"
   echo -e "${YELLOW} --------------------------------- ${RED}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
-  echo -e "${BLUE}[11] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
+  echo -e "${BLUE}[12] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
-  echo -e "${BLUE}[12] ${NC}Quitter"
+  echo -e "${BLUE}[13] ${NC}Quitter"
   echo -e ""
 }
 
@@ -278,6 +279,18 @@ install_phpmyadmin() {
   echo -e "${BLUE}L'installation de votre PhpMyAdmin à été éffectué correctement.${NC}"
 }
 
+install_plesk() {
+  if ! command -v plesk &> /dev/null; then
+    sudo apt-get update
+    if ! command -v wget &> /dev/null; then
+      apt install wget -y
+    fi
+    sh <(curl https://autoinstall.plesk.com/one-click-installer || wget -O - https://autoinstall.plesk.com/one-click-installer)
+  else
+    echo -e "${BLUE}Plesk est déjà installé sur le système.${NC}"
+  fi
+}
+
 
 # Afficher le menu et demander à l'utilisateur de saisir une option
 while true
@@ -318,9 +331,12 @@ do
       install_phpmyadmin
       ;;
     11)
-      setup_mariadb_server
+      install_plesk
       ;;
     12)
+      setup_mariadb_server
+      ;;
+    13)
       echo "Merci d'avoir utiliser le script d'installation Linux de Tom's Tools.${NC}"
       exit 0
       ;;
