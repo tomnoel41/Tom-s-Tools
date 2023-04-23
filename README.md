@@ -12,10 +12,10 @@ Tom's Tools is a bash script (.sh) designed for Linux that automates a variety o
 | Ubuntu           | 18.04   | :white_check_mark: |
 |                  | 20.04   | :white_check_mark: |
 |                  | 22.04   | :white_check_mark: |
-| Debian           | 8       | :red_circle: \*    |
-|                  | 9       | :red_circle: \*    |
-|                  | 10      | :red_circle: \* |
-|                  | 11      | :red_circle: \* |
+| Debian           | 8       | :red_circle:       |
+|                  | 9       | :red_circle:       |
+|                  | 10      | :red_circle:       |
+|                  | 11      | :red_circle:       |
 
 ## Installation
 ```bash
