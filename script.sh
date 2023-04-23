@@ -4,10 +4,11 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 RED='\033[31m'
 NC='\033[0m'
-VERSION='v1.3.2'
+VERSION='v1.3.3'
 
 # Fonction pour afficher les options disponibles
 display_menu() {
+  clear
   echo -e "${RED}
   
 ████████╗░█████╗░███╗░░░███╗██╗░██████╗  ████████╗░█████╗░░█████╗░██╗░░░░░░██████╗░░░░██████╗██╗░░██╗
@@ -16,36 +17,39 @@ display_menu() {
 ░░░██║░░░██║░░██║██║╚██╔╝██║░░░░╚═══██╗  ░░░██║░░░██║░░██║██║░░██║██║░░░░░░╚═══██╗░░░░╚═══██╗██╔══██║
 ░░░██║░░░╚█████╔╝██║░╚═╝░██║░░░██████╔╝  ░░░██║░░░╚█████╔╝╚█████╔╝███████╗██████╔╝██╗██████╔╝██║░░██║
 ░░░╚═╝░░░░╚════╝░╚═╝░░░░░╚═╝░░░╚═════╝░  ░░░╚═╝░░░░╚════╝░░╚════╝░╚══════╝╚═════╝░╚═╝╚═════╝░╚═╝░░╚═╝
+Version : ${VERSION}
   ${NC}"
-  echo -e "${YELLOW}Voici les options disponible sur la version actuel du script, que voulez-vous faire ?"
-  echo -e "${BLUE}1. ${YELLOW}Mettre à jour le système"
-  echo -e "${BLUE}2. ${YELLOW}Installer des packages de base ${BLUE}(bash, curl, sudo, wget, nload, htop, git)"
-  echo -e "${BLUE}3. ${YELLOW}Installer l'utilitaire ${BLUE}Speedtest (Ookla)"
-  echo -e "${BLUE}4. ${YELLOW}Créer un nouvel utilisateur"
-  echo -e "${BLUE}5. ${YELLOW}Tout faire ${BLUE}(1, 2 et 3)"
-  echo -e "${YELLOW} -------------------------------------- ${BLUE}SERVEURS DE JEUX ${YELLOW}--------------------------------------"
-  echo -e "${BLUE}6. ${YELLOW}Créer et lancer un serveur ${BLUE}Minecraft"
-  echo -e "${BLUE}7. ${YELLOW}Créer et lancer un serveur ${BLUE}Bungeecord"
-  echo -e "${BLUE}8. ${YELLOW}Créer et lancer un serveur ${BLUE}FiveM"
-  echo -e "${YELLOW} ---------------------------------------- ${BLUE}SERVEURS WEB  ${YELLOW}---------------------------------------"
-  echo -e "${BLUE}9. ${YELLOW}Installer un serveur ${BLUE}Nginx"
-  echo -e "${BLUE}10. ${YELLOW}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [7 + 9])"
+  echo -e "${BLUE}[1] ${NC}Mettre à jour le système"
+  echo -e "${BLUE}[2] ${NC}Installer des packages de base ${BLUE}(bash, curl, sudo, wget, nload, htop, git)"
+  echo -e "${BLUE}[3] ${NC}Installer l'utilitaire ${BLUE}Speedtest (Ookla)"
+  echo -e "${BLUE}[4] ${NC}Créer un nouvel utilisateur"
+  echo -e "${BLUE}[5] ${NC}Tout faire ${BLUE}(1, 2 et 3)"
+  echo -e "${YELLOW} -------------------------------------- ${RED}SERVEURS DE JEUX ${YELLOW}--------------------------------------"
+  echo -e "${BLUE}[6] ${NC}Créer et lancer un serveur ${BLUE}Minecraft"
+  echo -e "${BLUE}[7] ${NC}Créer et lancer un serveur ${BLUE}Bungeecord"
+  echo -e "${BLUE}[8] ${NC}Créer et lancer un serveur ${BLUE}FiveM"
+  echo -e "${YELLOW} ---------------------------------------- ${RED}SERVEURS WEB  ${YELLOW}---------------------------------------"
+  echo -e "${BLUE}[9] ${NC}Installer un serveur ${BLUE}Nginx"
+  echo -e "${BLUE}[10] ${NC}Installer l'interface ${BLUE}PhpMyAdmin (require Nginx & MariaDB [7 + 9])"
   echo -e "${YELLOW} --------------------------------- ${BLUE}SERVEURS DE BASE DE DONNES  ${YELLOW}--------------------------------"
-  echo -e "${BLUE}11. ${YELLOW}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
+  echo -e "${BLUE}[11] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
-  echo -e "${BLUE}12. ${YELLOW}Quitter (Bye bye)"
+  echo -e "${BLUE}[12] ${NC}Quitter l'instance Tom's Tools"
 }
 
 
 # Vérification des mises à jour
 if ! command -v curl &> /dev/null; then
+    clear
     echo "Curl n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
     apt install curl -y
 fi
+clear
 echo -e "${YELLOW}Vérification des mises à jour...${NC}"
 latest_version=$(curl -s https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/last_version.txt)
 if [[ "$latest_version" != "$VERSION" ]]; then
+   clear
    echo -e "${YELLOW}Une nouvelle version de ce script est disponible ! (version $latest_version)${NC}"
    echo -e "${YELLOW}Voulez-vous mettre à jour ? (y/n)${NC}"
    read update_script
