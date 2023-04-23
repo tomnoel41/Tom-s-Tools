@@ -5,6 +5,8 @@ BLUE='\033[1;34m'
 RED='\033[31m'
 NC='\033[0m'
 VERSION='v4.1'
+IP=$(hostname -I)
+HOSTNAME=$(hostname)
 
 # Fonction pour afficher les options disponibles
 display_menu() {
@@ -18,6 +20,8 @@ display_menu() {
 ░░░██║░░░╚█████╔╝██║░╚═╝░██║░░░██████╔╝  ░░░██║░░░╚█████╔╝╚█████╔╝███████╗██████╔╝██╗██████╔╝██║░░██║
 ░░░╚═╝░░░░╚════╝░╚═╝░░░░░╚═╝░░░╚═════╝░  ░░░╚═╝░░░░╚════╝░░╚════╝░╚══════╝╚═════╝░╚═╝╚═════╝░╚═╝░░╚═╝
 Version : ${VERSION}
+IP : ${IP} 
+Hostname : ${HOSTNAME}
   ${NC}"
   echo -e "${BLUE}[1] ${NC}Mettre à jour le système"
   echo -e "${BLUE}[2] ${NC}Installer des packages de base ${BLUE}(bash, curl, sudo, wget, nload, htop, git)"
