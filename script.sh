@@ -27,7 +27,7 @@ Hostname : ${HOSTNAME}
   echo -e "${BLUE}[2] ${NC}Installer des packages de base ${BLUE}(bash, curl, sudo, wget, nload, htop, git)"
   echo -e "${BLUE}[3] ${NC}Installer l'utilitaire ${BLUE}Speedtest (Ookla)"
   echo -e "${BLUE}[4] ${NC}Créer un nouvel utilisateur"
-  echo -e "${BLUE}[5] ${NC}Tout faire ${BLUE}(1, 2 et 3)"
+  echo -e "${BLUE}[5] ${NC}Tout faire ${BLUE}(1, 2 et 4)"
   echo -e "${YELLOW} -------------------------------------- ${RED}SERVEURS DE JEUX ${YELLOW}--------------------------------------"
   echo -e "${BLUE}[6] ${NC}Créer et lancer un serveur ${BLUE}Minecraft"
   echo -e "${BLUE}[7] ${NC}Créer et lancer un serveur ${BLUE}Bungeecord"
