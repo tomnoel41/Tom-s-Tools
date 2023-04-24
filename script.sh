@@ -10,7 +10,6 @@ HOSTNAME=$(hostname)
 
 # Fonction pour afficher les options disponibles
 display_menu() {
-  clear
   echo -e "${RED}
   
 ████████╗░█████╗░███╗░░░███╗██╗░██████╗  ████████╗░█████╗░░█████╗░██╗░░░░░░██████╗░░░░██████╗██╗░░██╗
@@ -94,17 +93,20 @@ fi
 
 # Fonction pour mettre à jour le système
 update_system() {
+  clear
   sudo apt update -y
   sudo apt upgrade -y
 }
 
 # Fonction pour installer les packages de base
 install_packages() {
+  clear
   sudo apt install -y bash curl sudo wget nload htop git
 }
 
 # Fonction pour créer un nouvel utilisateur
 create_user() {
+  clear
   read -p "Voulez-vous donner les permissions sudo et root à cet utilisateur ? (y/n): " give_permissions
   read -p "Veuillez saisir le nom d'utilisateur pour le nouvel utilisateur :" new_user
   read -s -p "Veuillez saisir le mot de passe pour le nouvel utilisateur :" new_password
@@ -117,6 +119,7 @@ create_user() {
 }
 
 install_speedtest() {
+  clear
   if ! command -v speedtest &> /dev/null; then
     curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
     sudo apt-get install speedtest
@@ -127,6 +130,7 @@ install_speedtest() {
 }
 
 create_minecraft_server() {
+  clear
   # Vérifier si Java est installé
   if ! command -v java &> /dev/null; then
     echo "Java n'est pas installé. Installation en cours...${NC}"
@@ -163,6 +167,7 @@ create_minecraft_server() {
 }
 
 create_bungeecord_server() {
+  clear
   # Vérifier si Java est installé
   if ! command -v java &> /dev/null; then
     echo "${YELLOW}Java n'est pas installé. Installation en cours...${NC}"
@@ -196,6 +201,7 @@ create_bungeecord_server() {
 }
 
 create_fivem_server() {
+  clear
   # Vérifier si xz-utils est installé
   if ! command -v tar &> /dev/null; then
     echo "${YELLOW}xz-utils n'est pas installé. Installation en cours...${NC}"
@@ -240,6 +246,7 @@ create_fivem_server() {
 }
 
 setup_mariadb_server() {
+  clear
   # Installation de MariaDB
   sudo apt-get update -y
   sudo apt-get upgrade -y
@@ -277,21 +284,12 @@ setup_mariadb_server() {
     exit 1
   fi
   apt install mariadb-server -y
-  # Configuration de MariaDB
   sudo mysql_secure_installation
-
-  # Ajouter un utilisateur avec les permissions requises
-  read -p "Voulez vous créer un utilisateur administrateur ? (y/n): " create_admin_account
-  if [[ "$create_admin_account" == "y" ]]; then
-  read -p "Entrez le nom d'utilisateur de votre compte:" new_admin_user
-  read -s -p "Entrez le mot de passe de votre compte:" new_pass_user
-    sudo mysql -e "CREATE USER '${new_admin_user}'@'%' IDENTIFIED BY '${new_pass_user}';"
-    sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${new_admin_user}'@'%' WITH GRANT OPTION;"
-  fi
   echo -e "${YELLOW}L'installation de votre serveur MariaDB à été éffectué correctement.${NC}"
 }
 
 install_nginx_php() {
+    clear
     # Installer Nginx
     read -p "Voulez vous supprimer la configuration par défaut de nginx ? (y/n): " delete_default
     sudo apt-get update
@@ -330,6 +328,7 @@ install_nginx_php() {
 }
 
 install_phpmyadmin() {
+  clear
   if ! command -v unzip &> /dev/null; then
     echo "${YELLOW}Unzip n'est pas installé. Installation en cours...${NC}"
     sudo apt-get update
@@ -421,6 +420,7 @@ EOF
 }
 
 install_plesk() {
+  clear
   if ! command -v plesk &> /dev/null; then
     sudo apt-get update
     if ! command -v wget &> /dev/null; then
@@ -433,6 +433,7 @@ install_plesk() {
 }
 
 install_ptero() {
+    clear
     echo -e "${RED}Attention! Vous devez d'abbord installer Nginx, MariaDB et PhpMyAdmin !${NC}"
     echo -e ""
     read -p "Voulez-vous utiliser un nom de domaine pour le Pterodactyl ? (y/n): " ptero_domain_boolean
@@ -441,10 +442,16 @@ install_ptero() {
       read -p "Entrez le nom de domaine: " ptero_domain
     else
       read -p "Entrez l'adresse IP du serveur web (exemple : 10.0.10.12):" ptero_without_ssl_ip
-      read -p "Entrez le port à utiliser (exemple : 9443):" ptero_without_ssl_port
+      read -p "Entrez le port à utiliser (exemple : 80):" ptero_without_ssl_port
     fi
     echo -e ""
-    read -p "Entrez le mot de passe de l'utilisateur Pterodactyl (MariaDB) : " pterodactyl_bdd_password
+    read -p "Voulez-vous créer un utilisateur MariaDB pour les base de données des serveurs ? (y/n): " add_user_mariadb
+    if [[ "$add_user_mariadb" == "y" ]]; then
+      read -p "Entrez le nom d'utilisateur de votre compte (exemple: ptero): " new_admin_user
+      read -s -p "Entrez le mot de passe de votre compte :" new_pass_user
+      sudo mysql -e "CREATE USER '${new_admin_user}'@'%' IDENTIFIED BY '${new_pass_user}';"
+      sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${new_admin_user}'@'%' WITH GRANT OPTION;"
+    fi
 
     apt -y install software-properties-common curl apt-transport-https ca-certificates gnupg
     LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
@@ -466,17 +473,14 @@ install_ptero() {
     cp .env.example .env
     composer install --no-dev --optimize-autoloader
     php artisan key:generate --force
+    echo -e "${RED}Utilisez les identifiants par défaut pour redis (déjà pré-installé) !" 
     php artisan p:environment:setup
+    echo -e "${RED}Entrez le nom d'utilisateur par défaut (pterodactyl) et utilisez le mot de passe que vous avez spécifié ci-dessus !" 
     php artisan p:environment:database
     php artisan migrate --seed --force
     php artisan p:user:make
     chown -R www-data:www-data /var/www/pterodactyl/*
-    
-    
-
-    config_file="/etc/systemd/system/pteroq.service"
-
-cat << EOF | sudo tee $config_file > /dev/null
+    cat << EOF | sudo tee /etc/systemd/system/pteroq.service > /dev/null
 [Unit]
 Description=Pterodactyl Queue Worker
 After=redis-server.service
@@ -497,11 +501,6 @@ EOF
     sudo systemctl daemon-reload
     sudo systemctl enable pteroq.service
     sudo systemctl start pteroq.service
-
-
-
-
-
     sudo systemctl enable --now redis-server
     sudo systemctl enable --now pteroq.service
     if [[ "$ptero_domain_boolean" == "y" ]]; then
@@ -653,9 +652,11 @@ EOF
 
     sudo systemctl daemon-reload
     systemctl enable --now wings
+    echo -e "${YELLOW}Votre pterodactyl a bien été installé. Vous pouvez y accéder depuis l'addrese IP ou le domaine mentionné ci-dessus.${NC}"
 }
 
 update_ptero() {
+  clear
   cd /var/www/pterodactyl
   php artisan down
   curl -L https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz | tar -xzv
