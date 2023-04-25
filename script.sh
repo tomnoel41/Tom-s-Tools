@@ -4,7 +4,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 RED='\033[31m'
 NC='\033[0m'
-VERSION='v4.3'
+VERSION='v4.4'
 IP=$(hostname -I)
 HOSTNAME=$(hostname)
 
@@ -45,10 +45,11 @@ Hostname : ${HOSTNAME}
   echo -e "${YELLOW} --------------------------------- ${RED}SERVEURS DE BASE DE DONNEES  ${YELLOW}--------------------------------"
   echo -e ""
   echo -e "${BLUE}[14] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
+  echo -e "${BLUE}[15] ${NC}Créer un utilisateur MariaDB"
   echo -e ""
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
   echo -e ""
-  echo -e "${BLUE}[15] ${NC}Quitter"
+  echo -e "${BLUE}[16] ${NC}Quitter l'utilitaire"
   echo -e ""
 }
 
@@ -441,14 +442,14 @@ install_ptero() {
       echo $e "${RED}Attention, le nom de domaine doit pointé vers l'adresse IP du serveur."
       read -p "Entrez le nom de domaine: " ptero_domain
     else
-      read -p "Entrez l'adresse IP du serveur web (exemple : 10.0.10.12):" ptero_without_ssl_ip
-      read -p "Entrez le port à utiliser (exemple : 80):" ptero_without_ssl_port
+      read -p "Entrez l'adresse IP du serveur web (exemple : 10.0.10.12): " ptero_without_ssl_ip
+      read -p "Entrez le port à utiliser (exemple : 80): " ptero_without_ssl_port
     fi
     echo -e ""
     read -p "Voulez-vous créer un utilisateur MariaDB pour les base de données des serveurs ? (y/n): " add_user_mariadb
     if [[ "$add_user_mariadb" == "y" ]]; then
       read -p "Entrez le nom d'utilisateur de votre compte (exemple: ptero): " new_admin_user
-      read -s -p "Entrez le mot de passe de votre compte :" new_pass_user
+      read -s -p "Entrez le mot de passe de votre compte: " new_pass_user
       sudo mysql -e "CREATE USER '${new_admin_user}'@'%' IDENTIFIED BY '${new_pass_user}';"
       sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${new_admin_user}'@'%' WITH GRANT OPTION;"
     fi
@@ -671,6 +672,13 @@ update_ptero() {
   echo -e "${YELLOW}La mise à jours de Pterodactyl a été éffectué.${NC}"
 }
 
+add_mariadb_user() {
+  read -p "Entrez le nom d'utilisateur de votre compte : " new_admin_user
+  read -s -p "Entrez le mot de passe de votre compte: " new_pass_user
+  sudo mysql -e "CREATE USER '${new_admin_user}'@'%' IDENTIFIED BY '${new_pass_user}';"
+  sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${new_admin_user}'@'%' WITH GRANT OPTION;"
+}
+
 
 # Afficher le menu et demander à l'utilisateur de saisir une option
 while true
@@ -723,6 +731,9 @@ do
       setup_mariadb_server
       ;;
     15)
+      add_mariadb_user
+      ;;
+    16)
       echo "${YELLOW}Merci d'avoir utiliser le script d'installation Linux de Tom's Tools.${NC}"
       exit 0
       ;;
