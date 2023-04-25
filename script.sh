@@ -337,6 +337,7 @@ install_phpmyadmin() {
   fi
   apt -y install php8.1 php8.1-{common,cli,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip} tar git redis-server
   export PHPMYADMIN_VERSION=$(curl --silent https://www.phpmyadmin.net/downloads/ | grep "btn btn-success download_popup" | sed -n 's/.*href="\([^"]*\).*/\1/p' | tr '/' '\n' | grep -E '^.*[0-9]+\.[0-9]+\.[0-9]+$')
+  echo -e "${RED}Attention, si vous avez supprimer la configuration par défaut de nginx, il ne sera pas accessible.${NC}"
   read -p "Souhaitez-vous utiliser un nom de domaine ? (y/n): " domain_boolean
   if [[ "$domain_boolean" == "y" ]]; then
     apt install python3-certbot-nginx -y
