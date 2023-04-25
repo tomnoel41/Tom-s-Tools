@@ -45,7 +45,7 @@ Hostname : ${HOSTNAME}
   echo -e "${YELLOW} --------------------------------- ${RED}SERVEURS DE BASE DE DONNEES  ${YELLOW}--------------------------------"
   echo -e ""
   echo -e "${BLUE}[14] ${NC}Installer et configurer un serveur ${BLUE}MariaDB (MySQL)"
-  echo -e "${BLUE}[15] ${NC}Créer un utilisateur MariaDB"
+  echo -e "${BLUE}[15] ${NC}Créer un utilisateur administrateur MariaDB"
   echo -e ""
   echo -e "${YELLOW} ----------------------------------------------------------------------------------------------"
   echo -e ""
