@@ -21,6 +21,8 @@ display_menu() {
 Version : ${VERSION}
 IP : ${IP} 
 Hostname : ${HOSTNAME}
+Attention, ce script est en bêta, veuillez ne pas l'utiliser sur de la production.
+(Contact : tom.noel@atib.network si vous rencontrez un soucis).
   ${NC}"
   echo -e "${BLUE}[1] ${NC}Mettre à jour le système"
   echo -e "${BLUE}[2] ${NC}Installer des packages de base ${BLUE}(bash, curl, sudo, wget, nload, htop, git)"
@@ -55,17 +57,17 @@ Hostname : ${HOSTNAME}
 
 
 # Vérification des mises à jour
-if ! command -v curl &> /dev/null; then
-    clear
-    echo "curl n'est pas installé. Installation en cours...${NC}"
-    sudo apt-get update
-    apt install curl -y
-fi
 if ! command -v sudo &> /dev/null; then
     clear
     echo "sudo n'est pas installé. Installation en cours...${NC}"
-    sudo apt-get update
+    apt update -y
     apt install sudo -y
+fi
+if ! command -v curl &> /dev/null; then
+    clear
+    echo "curl n'est pas installé. Installation en cours...${NC}"
+    sudo apt update
+    apt install curl -y
 fi
 clear
 echo -e "${YELLOW}Vérification des mises à jour...${NC}"
@@ -123,7 +125,7 @@ install_speedtest() {
   clear
   if ! command -v speedtest &> /dev/null; then
     curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
-    sudo apt-get install speedtest
+    sudo apt install speedtest
     echo -e "${YELLOW}Speedtest à été installé avec succès ! (exemple : speedtest -s 24215)${NC}"
   else
     echo -e "${YELLOW}Speedtest est déjà installé sur votre serveur !${NC}"
@@ -135,18 +137,18 @@ create_minecraft_server() {
   # Vérifier si Java est installé
   if ! command -v java &> /dev/null; then
     echo "Java n'est pas installé. Installation en cours...${NC}"
-    sudo apt-get update
-    sudo apt-get install openjdk-17-jdk openjdk-17-jre -y
+    sudo apt update
+    sudo apt install openjdk-17-jdk openjdk-17-jre -y
   fi
   
   # Demander à l'utilisateur de saisir la version du serveur
-  read -p "Veuillez entrer la version de Spigot à installer (par exemple, '1.12.2'):" version
+  read -p "Veuillez entrer la version de Spigot à installer (par exemple, '1.12.2'): " version
 
   # Demander à l'utilisateur la RAM max qu'il veut
-  read -p "Veuillez entrer la valeur maximum de la RAM que vous souhaitez (par exemple, '4096' pour 4GB):" max_ram
+  read -p "Veuillez entrer la valeur maximum de la RAM que vous souhaitez (par exemple, '4096' pour 4GB): " max_ram
   
   # Créer un dossier pour le serveur
-  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur:" server_path
+  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur: " server_path
   sudo mkdir -p $server_path
   cd $server_path
   
@@ -172,15 +174,15 @@ create_bungeecord_server() {
   # Vérifier si Java est installé
   if ! command -v java &> /dev/null; then
     echo "${YELLOW}Java n'est pas installé. Installation en cours...${NC}"
-    sudo apt-get update
-    sudo apt-get install openjdk-17-jdk openjdk-17-jre -y
+    sudo apt update
+    sudo apt install openjdk-17-jdk openjdk-17-jre -y
   fi
 
   # Demander à l'utilisateur la RAM max qu'il veut
-  read -p "Veuillez entrer la valeur maximum de la RAM que vous souhaitez (par exemple, '4096' pour 4GB):" max_ram
+  read -p "Veuillez entrer la valeur maximum de la RAM que vous souhaitez (par exemple, '4096' pour 4GB): " max_ram
   
   # Créer un dossier pour le serveur
-  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur:" server_path
+  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur: " server_path
   sudo mkdir -p $server_path
   cd $server_path
   
@@ -206,31 +208,31 @@ create_fivem_server() {
   # Vérifier si xz-utils est installé
   if ! command -v tar &> /dev/null; then
     echo "${YELLOW}xz-utils n'est pas installé. Installation en cours...${NC}"
-    sudo apt-get update
-    sudo apt-get install xz-utils -y
+    sudo apt update
+    sudo apt install xz-utils -y
   fi
 
   # Vérifier si git est installé
   if ! command -v git &> /dev/null; then
     echo "${YELLOW}git n'est pas installé. Installation en cours...${NC}"
-    sudo apt-get update
-    sudo apt-get install git -y
+    sudo apt update
+    sudo apt install git -y
   fi
 
   # Vérifier si wget est installé
   if ! command -v wget &> /dev/null; then
     echo "${YELLOW}wget n'est pas installé. Installation en cours...${NC}"
-    sudo apt-get update
-    sudo apt-get install wget -y
+    sudo apt update
+    sudo apt install wget -y
   fi
 
   # Créer un dossier pour le serveur
-  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur:" server_path
+  read -p "Veuillez entrer le chemin absolu où vous souhaitez créer le dossier pour le serveur: " server_path
   sudo mkdir -p $server_path
   cd $server_path
 
   # Télécharger l'artefacts (alpine)
-  read -p "Veuillez entrer le lien de l'artefacts (alpine) pour le serveur:" artefacts_link
+  read -p "Veuillez entrer le lien de l'artefacts (alpine) pour le serveur: " artefacts_link
   wget $artefacts_link
 
   # Unarchive l'artefacts
@@ -249,8 +251,8 @@ create_fivem_server() {
 setup_mariadb_server() {
   clear
   # Installation de MariaDB
-  sudo apt-get update -y
-  sudo apt-get upgrade -y
+  sudo apt update -y
+  sudo apt upgrade -y
 
   # Détection de la version de Linux
   if [[ -e /etc/debian_version ]]; then
@@ -267,17 +269,17 @@ setup_mariadb_server() {
   # Ajout du référentiel MariaDB approprié
   if [[ $DISTRO == "Ubuntu" && $VERSION -ge 20 ]]; then
     # Ajout du référentiel MariaDB 11.0 pour Ubuntu 20.04 ou version ultérieure
-    sudo apt-get install -y software-properties-common
+    sudo apt install -y software-properties-common
     sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
     sudo add-apt-repository 'deb [arch=amd64] http://mirror.zol.co.zw/mariadb/repo/11.0/ubuntu focal main'
   elif [[ $DISTRO == "Ubuntu" && $VERSION -lt 20 ]]; then
     # Ajout du référentiel MariaDB 11.0 pour Ubuntu 18.04 ou version antérieure
-    sudo apt-get install -y software-properties-common
+    sudo apt install -y software-properties-common
     sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
     sudo add-apt-repository 'deb [arch=amd64] http://mirror.zol.co.zw/mariadb/repo/11.0/ubuntu bionic main'
   elif [[ $DISTRO == "Debian" && $VERSION -ge 10 ]]; then
     # Ajout du référentiel MariaDB 11.0 pour Debian 10 ou version ultérieure
-    sudo apt-get install -y software-properties-common dirmngr gnupg2
+    sudo apt install -y software-properties-common dirmngr gnupg2
     sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
     sudo add-apt-repository 'deb [arch=amd64] http://mirror.zol.co.zw/mariadb/repo/11.0/debian buster main'
   else
@@ -293,13 +295,13 @@ install_nginx_php() {
     clear
     # Installer Nginx
     read -p "Voulez vous supprimer la configuration par défaut de nginx ? (y/n): " delete_default
-    sudo apt-get update
-    sudo apt-get install -y nginx
-    sudo apt-get install python3-certbot-nginx -y
+    sudo apt update
+    sudo apt install -y nginx
+    sudo apt install python3-certbot-nginx -y
     sudo apt -y install software-properties-common
     sudo add-apt-repository -y ppa:ondrej/php
-    sudo apt-get update
-    sudo apt-get install -y php7.4-fpm php7.4-common php7.4-mysql php7.4-gd php7.4-json php7.4-cli
+    sudo apt update
+    sudo apt install -y php7.4-fpm php7.4-common php7.4-mysql php7.4-gd php7.4-json php7.4-cli
 
     # Configurer Nginx pour utiliser PHP-FPM
     if [[ "$delete_default" == "y" ]]; then
@@ -332,18 +334,18 @@ install_phpmyadmin() {
   clear
   if ! command -v unzip &> /dev/null; then
     echo "${YELLOW}Unzip n'est pas installé. Installation en cours...${NC}"
-    sudo apt-get update
+    sudo apt update
     apt install zip unzip -y
   fi
   apt -y install php8.1 php8.1-{common,cli,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip} tar git redis-server
   export PHPMYADMIN_VERSION=$(curl --silent https://www.phpmyadmin.net/downloads/ | grep "btn btn-success download_popup" | sed -n 's/.*href="\([^"]*\).*/\1/p' | tr '/' '\n' | grep -E '^.*[0-9]+\.[0-9]+\.[0-9]+$')
-  echo -e "${RED}Attention, si vous avez supprimer la configuration par défaut de nginx, il ne sera pas accessible.${NC}"
+  echo -e "${RED}Attention, si vous avez supprimer la configuration par défaut de nginx, il ne sera pas accessible si vous n'utilisez pas un domaine.${NC}"
   read -p "Souhaitez-vous utiliser un nom de domaine ? (y/n): " domain_boolean
   if [[ "$domain_boolean" == "y" ]]; then
     apt install python3-certbot-nginx -y
     echo -e "${RED}Attention, le nom de domaine doit pointer vers l'adresse IP du serveur.${NC}"
     read -p "Entrez le nom de domaine que vous souhaitez utiliser: " domain
-    read -p "Entrez le répertoire d'installation : (exemple : /var/www/phpmyadmin)" repertoire
+    read -p "Entrez le répertoire d'installation (exemple : /var/www/phpmyadmin): " repertoire
     certbot --nginx -d $domain
     mkdir $repertoire
     cd $repertoire && wget https://files.phpmyadmin.net/phpMyAdmin/$PHPMYADMIN_VERSION/phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && unzip phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && rm phpMyAdmin-$PHPMYADMIN_VERSION-all-languages.zip && mv phpMyAdmin-$PHPMYADMIN_VERSION-all-languages pma
@@ -424,7 +426,7 @@ EOF
 install_plesk() {
   clear
   if ! command -v plesk &> /dev/null; then
-    sudo apt-get update
+    sudo apt update
     if ! command -v wget &> /dev/null; then
       apt install wget -y
     fi
@@ -649,7 +651,7 @@ StartLimitBurst=30
 RestartSec=5s
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.targetqz
 EOF
 
     sudo systemctl daemon-reload
@@ -685,7 +687,7 @@ add_mariadb_user() {
 while true
 do
   display_menu
-  read -p "Choisissez l'option que vous souhaitez : " choice
+  read -p "Choisissez l'option que vous souhaitez: " choice
   case $choice in
     1)
       update_system
