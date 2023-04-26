@@ -110,9 +110,9 @@ install_packages() {
 # Fonction pour créer un nouvel utilisateur
 create_user() {
   clear
-  read -p "Voulez-vous donner les permissions sudo et root à cet utilisateur ? (y/n): " give_permissions
   read -p "Veuillez saisir le nom d'utilisateur pour le nouvel utilisateur :" new_user
   read -s -p "Veuillez saisir le mot de passe pour le nouvel utilisateur :" new_password
+  read -p "Voulez-vous donner les permissions sudo et root à cet utilisateur ? (y/n): " give_permissions
   sudo adduser $new_user --gecos "User"
   if [[ "$give_permissions" == "y" ]]; then
     sudo usermod -aG sudo $new_user
@@ -438,7 +438,7 @@ install_plesk() {
 
 install_ptero() {
     clear
-    echo -e "${RED}Attention! Vous devez d'abbord installer Nginx, MariaDB et PhpMyAdmin !${NC}"
+    echo -e "${RED}Veuillez installer Nginx, MariaDB et PhpMyAdmin !${NC}"
     echo -e ""
     read -p "Voulez-vous utiliser un nom de domaine pour le Pterodactyl ? (y/n): " ptero_domain_boolean
     if [[ "$ptero_domain_boolean" == "y" ]]; then
@@ -456,7 +456,6 @@ install_ptero() {
       sudo mysql -e "CREATE USER '${new_admin_user}'@'%' IDENTIFIED BY '${new_pass_user}';"
       sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO '${new_admin_user}'@'%' WITH GRANT OPTION;"
     fi
-
     apt -y install software-properties-common curl apt-transport-https ca-certificates gnupg
     LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
     curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
@@ -508,10 +507,10 @@ EOF
     sudo systemctl enable --now redis-server
     sudo systemctl enable --now pteroq.service
     if [[ "$ptero_domain_boolean" == "y" ]]; then
-      sudo apt update -y
-      sudo apt install python3-certbot-nginx -y
-      certbot --nginx -d $ptero_domain
-      cat << EOF | sudo tee /etc/nginx/sites-enabled/pterodactyl.conf > /dev/null
+    sudo apt update -y
+    sudo apt install python3-certbot-nginx -y
+    certbot --nginx -d $ptero_domain
+    cat << EOF | sudo tee /etc/nginx/sites-enabled/pterodactyl.conf > /dev/null
 server_tokens off;
 server {
     listen 80;
@@ -737,11 +736,11 @@ do
       add_mariadb_user
       ;;
     16)
-      echo "${YELLOW}Merci d'avoir utiliser le script d'installation Linux de Tom's Tools.${NC}"
+      echo "${YELLOW}Merci d'avoir utiliser le script d'installation Linux de Tom's Tools. ${NC}"
       exit 0
       ;;
     *)
-      echo "${YELLOW}Option invalide. Veuillez choisir une option valide.${NC}"
+      echo "${YELLOW}Option invalide. Veuillez choisir une option valide. ${NC}"
       ;;
   esac
 done
