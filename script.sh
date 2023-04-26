@@ -4,7 +4,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;34m'
 RED='\033[31m'
 NC='\033[0m'
-VERSION='v4.4'
+VERSION='v4.4.2'
 IP=$(hostname -I)
 HOSTNAME=$(hostname)
 
