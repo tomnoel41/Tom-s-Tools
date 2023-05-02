@@ -18,7 +18,7 @@ Tom's Tools is a bash script (.sh) designed for Linux that automates a variety o
 
 ## Installation
 ```bash
-wget https://raw.githubusercontent.com/tomnoel41/Tom-s-Tools/main/script.sh
+wget https://download.tomnoel.cloud/scripts/tom-s-tools/script.sh
 chmod +x script.sh
 ```
 
